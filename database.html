@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Database PPKS – Kota Batu (v5)</title>
+<title>Database PPKS – Kota Batu </title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -318,7 +318,7 @@ tbody tr:nth-child(even){background:var(--surface2);}
       <i class="fa-solid fa-table"></i> Export Excel (.xlsx)
     </div>
   </nav>
-  <div class="sidebar-footer">Sistem Informasi PPKS<br>Kota Batu © 2025<br><span style="opacity:.45;font-size:9px;">v5 · mapping presisi</span></div>
+  <div class="sidebar-footer">Sistem Informasi PPKS<br>Kota Batu © 2026</div>
 </aside>
 
 <!-- ═══════════ MAIN ═══════════ -->
@@ -508,9 +508,22 @@ tbody tr:nth-child(even){background:var(--surface2);}
 </div><!-- /layout -->
 
 <!-- ═══════════ EXPORT MODAL ═══════════ -->
+<style>
+.fmt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 16px;}
+.fmt-card{border:2px solid var(--border2);border-radius:var(--r2);padding:14px 10px;text-align:center;cursor:pointer;transition:all .18s;background:var(--surface2);}
+.fmt-card:hover{border-color:var(--indigo);background:var(--indigo-l);}
+.fmt-card.selected{border-color:var(--indigo);background:var(--indigo-l);box-shadow:0 0 0 3px rgba(79,70,229,.15);}
+.fmt-card i{font-size:22px;margin-bottom:7px;display:block;}
+.fmt-card .fmt-label{font-size:12px;font-weight:700;color:var(--text2);}
+.fmt-card .fmt-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+.fmt-card.excel i{color:#16a34a;}
+.fmt-card.docs i{color:#2563eb;}
+.fmt-card.pdf i{color:#dc2626;}
+.fmt-card.selected .fmt-label{color:var(--indigo);}
+</style>
 <div class="modal-backdrop" id="exportModal">
   <div class="modal-box">
-    <div class="modal-title"><i class="fa-solid fa-print"></i> Cetak Laporan Bulanan</div>
+    <div class="modal-title"><i class="fa-solid fa-file-export"></i> Export Laporan</div>
     <label class="month-range-toggle"><input type="checkbox" id="useRange"> Gunakan rentang bulan</label>
     <div id="singleMonthBlock">
       <div class="modal-row">
@@ -528,10 +541,28 @@ tbody tr:nth-child(even){background:var(--surface2);}
         <div class="field"><label>Tahun</label><select id="expTahunSampai" class="form-select"></select></div>
       </div>
     </div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Pilih Format</div>
+    <div class="fmt-grid">
+      <div class="fmt-card excel selected" id="fmt-excel" onclick="selectFmt('excel')">
+        <i class="fa-solid fa-file-excel"></i>
+        <div class="fmt-label">Excel</div>
+        <div class="fmt-sub">.xlsx</div>
+      </div>
+      <div class="fmt-card docs" id="fmt-docs" onclick="selectFmt('docs')">
+        <i class="fa-solid fa-file-word"></i>
+        <div class="fmt-label">Word / Docs</div>
+        <div class="fmt-sub">.doc (HTML)</div>
+      </div>
+      <div class="fmt-card pdf" id="fmt-pdf" onclick="selectFmt('pdf')">
+        <i class="fa-solid fa-file-pdf"></i>
+        <div class="fmt-label">PDF / Cetak</div>
+        <div class="fmt-sub">Print dialog</div>
+      </div>
+    </div>
     <div class="info-box"><i class="fa-solid fa-circle-info"></i> Rekap per jenis PPKS & layanan, dikelompokkan per kecamatan (Batu, Bumiaji, Junrejo + Lainnya).</div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeExportModal()">Batal</button>
-      <button class="btn btn-success" onclick="generateReport()"><i class="fa-solid fa-print"></i> Buat & Cetak</button>
+      <button class="btn btn-success" onclick="generateReport()"><i class="fa-solid fa-download"></i> <span id="expBtnLabel">Export Excel</span></button>
     </div>
   </div>
 </div>
@@ -1287,7 +1318,15 @@ document.getElementById('useRange').addEventListener('change',function(){
   document.getElementById('rangeMonthBlock').style.display=this.checked?'':'none';
 });
 
-function generateReport() {
+let currentFmt = 'excel';
+function selectFmt(fmt) {
+  currentFmt = fmt;
+  ['excel','docs','pdf'].forEach(f => document.getElementById('fmt-'+f).classList.toggle('selected', f===fmt));
+  const labels = {excel:'Export Excel', docs:'Export Word/Docs', pdf:'Cetak / PDF'};
+  document.getElementById('expBtnLabel').textContent = labels[fmt];
+}
+
+function getReportData() {
   const isRange=document.getElementById('useRange').checked;
   let monthData=[],reportTitle='';
   if (!isRange) {
@@ -1299,52 +1338,208 @@ function generateReport() {
     const bS=+document.getElementById('expBulanSampai').value,tS=+document.getElementById('expTahunSampai').value;
     const dMs=new Date(tD,bD-1,1).getTime(), sMs=new Date(tS,bS,0).getTime();
     monthData=allData.filter(d=>{ const dt=parseDate(d.TANGGAL); if(!dt) return false; return dt.getTime()>=dMs&&dt.getTime()<=sMs; });
-    reportTitle=`${BULAN_NAMA[bD]} ${tD} – ${BULAN_NAMA[bS]} ${tS}`;
+    reportTitle=`${BULAN_NAMA[bD]} ${tD} \u2013 ${BULAN_NAMA[bS]} ${tS}`;
   }
-  if (!monthData.length) { alert('Tidak ada data untuk periode yang dipilih.'); return; }
-  const FIXED_KEC=["Batu","Bumiaji","Junrejo"];
-  const isLainnya=kec=>!FIXED_KEC.some(k=>k.toLowerCase()===(kec||'').trim().toLowerCase());
-  function countBy(data,ind,kec) { return data.filter(d=>(d.TINDAK_LANJUT||'').trim()===ind&&(kec==='Lainnya'?isLainnya((d.KECAMATAN_TEMUAN||'').trim()):((d.KECAMATAN_TEMUAN||'').trim().toLowerCase()===kec.toLowerCase()))).length; }
-  function buildTable(ppksData,ppksLabel) {
-    const kecIG=[...new Set(ppksData.map(d=>(d.KECAMATAN_TEMUAN||'').trim()))];
-    const mainK=FIXED_KEC.filter(k=>kecIG.some(d=>d.toLowerCase()===k.toLowerCase()));
-    const hasL=kecIG.some(d=>isLainnya(d));
-    const allKec=hasL?[...mainK,'Lainnya']:mainK;
-    const inds=[...new Set(ppksData.map(d=>(d.TINDAK_LANJUT||'').trim()).filter(Boolean))].sort();
-    const rows=inds.map((ind,idx)=>{
-      const cells=allKec.map(kec=>`<td style="text-align:center;border:1px solid #ddd;padding:5px 8px;">${countBy(ppksData,ind,kec)}</td>`).join('');
-      return `<tr style="background:${idx%2===0?'#fff':'#f9fafb'}"><td style="border:1px solid #ddd;text-align:center;padding:5px 8px;color:#666;">${idx+1}</td><td style="border:1px solid #ddd;padding:5px 10px;">${ind}</td>${cells}<td style="text-align:center;border:1px solid #ddd;padding:5px 8px;font-weight:700;color:#1e40af;">${ppksData.filter(d=>(d.TINDAK_LANJUT||'').trim()===ind).length}</td></tr>`;
-    }).join('');
-    return `<div style="margin-bottom:22px;"><div style="background:#1e40af;color:#fff;padding:7px 13px;font-weight:700;font-size:11.5px;border-radius:5px 5px 0 0;">${ppksLabel.toUpperCase()}</div><table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="background:#3b82f6;color:#fff;text-align:center;"><th style="border:1px solid #ddd;padding:7px 5px;width:34px;">NO</th><th style="border:1px solid #ddd;padding:7px;text-align:left;">JENIS LAYANAN</th>${allKec.map(k=>`<th style="border:1px solid #ddd;padding:7px 5px;min-width:66px;">${k.toUpperCase()}</th>`).join('')}<th style="border:1px solid #ddd;padding:7px 5px;">TOTAL</th></tr></thead><tbody>${rows||`<tr><td colspan="${2+allKec.length+1}" style="text-align:center;padding:10px;border:1px solid #ddd;color:#aaa;">Tidak ada data</td></tr>`}</tbody></table></div>`;
-  }
-  function buildSummary(mData) {
-    const ppksList=[...new Set(mData.map(d=>(d.JENIS_PPKS||'').trim()).filter(Boolean))].sort();
-    const rows=ppksList.map((ppks,idx)=>{
-      const sub=mData.filter(d=>(d.JENIS_PPKS||'').trim()===ppks);
-      const cells=FIXED_KEC.map(kec=>`<td style="text-align:center;border:1px solid #ddd;padding:5px 8px;">${sub.filter(d=>(d.KECAMATAN_TEMUAN||'').trim().toLowerCase()===kec.toLowerCase()).length}</td>`).join('');
-      return `<tr style="background:${idx%2===0?'#fff':'#f9fafb'}"><td style="border:1px solid #ddd;text-align:center;padding:5px 8px;color:#666;">${idx+1}</td><td style="border:1px solid #ddd;padding:5px 10px;">${ppks}</td>${cells}<td style="text-align:center;border:1px solid #ddd;padding:5px 8px;">${sub.filter(d=>isLainnya((d.KECAMATAN_TEMUAN||'').trim())).length}</td><td style="text-align:center;border:1px solid #ddd;padding:5px 8px;font-weight:700;color:#1e40af;">${sub.length}</td></tr>`;
-    }).join('');
-    return `<div style="margin-bottom:22px;"><div style="background:#065f46;color:#fff;padding:7px 13px;font-weight:700;font-size:11.5px;border-radius:5px 5px 0 0;">REKAP KESELURUHAN PER JENIS PPKS</div><table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="background:#059669;color:#fff;text-align:center;"><th style="border:1px solid #ddd;padding:7px 5px;width:34px;">NO</th><th style="border:1px solid #ddd;padding:7px;text-align:left;">JENIS PPKS</th>${FIXED_KEC.map(k=>`<th style="border:1px solid #ddd;padding:7px 5px;">${k.toUpperCase()}</th>`).join('')}<th style="border:1px solid #ddd;padding:7px 5px;">LAINNYA</th><th style="border:1px solid #ddd;padding:7px 5px;">TOTAL</th></tr></thead><tbody>${rows}</tbody><tfoot><tr style="background:#f0fdf4;font-weight:700;"><td colspan="2" style="border:1px solid #ddd;padding:6px 10px;text-align:right;">TOTAL</td>${FIXED_KEC.map(kec=>`<td style="text-align:center;border:1px solid #ddd;padding:6px;">${mData.filter(d=>(d.KECAMATAN_TEMUAN||'').trim().toLowerCase()===kec.toLowerCase()).length}</td>`).join('')}<td style="text-align:center;border:1px solid #ddd;padding:6px;">${mData.filter(d=>isLainnya((d.KECAMATAN_TEMUAN||'').trim())).length}</td><td style="text-align:center;border:1px solid #ddd;padding:6px;color:#1e40af;">${mData.length}</td></tr></tfoot></table></div>`;
-  }
-  const ppksList=[...new Set(monthData.map(d=>(d.JENIS_PPKS||'').trim()).filter(Boolean))].sort();
-  const allTables=ppksList.map(p=>buildTable(monthData.filter(d=>(d.JENIS_PPKS||'').trim()===p),p)).join('');
-  const printHTML=`<!DOCTYPE html><html><head><title>Laporan PPKS – ${reportTitle}</title><style>body{font-family:Arial,sans-serif;margin:0;padding:20px 26px;font-size:11px;}@media print{@page{margin:1cm;}}</style></head><body>
-    <div style="text-align:center;margin-bottom:22px;border-bottom:2px solid #1e40af;padding-bottom:14px;">
-      <div style="font-size:14px;font-weight:700;text-transform:uppercase;color:#1e3a8a;">LAPORAN PELAYANAN TRC DINAS SOSIAL KOTA BATU</div>
-      <div style="font-size:12.5px;font-weight:600;margin-top:4px;color:#374151;">Periode: ${reportTitle}</div>
-    </div>
-    ${buildSummary(monthData)}
-    <div style="margin:24px 0 16px;font-weight:700;font-size:11.5px;color:#374151;border-bottom:1px solid #e5e7eb;padding-bottom:7px;">RINCIAN PER JENIS PPKS</div>
-    ${allTables}
-    <div style="margin-top:36px;display:flex;justify-content:space-between;font-size:11px;">
-      <div><p style="color:#6b7280;">Dicetak: ${new Date().toLocaleString('id-ID')}</p></div>
-      <div style="text-align:right;"><p>Batu, ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}</p><p style="margin-top:8px;">Kepala Bidang Rehabilitasi Sosial</p><div style="height:58px;"></div><p style="border-top:1px solid #374151;display:inline-block;padding:0 22px;font-weight:700;">( )</p></div>
-    </div>
-  </body><script>window.onload=function(){window.print();}<\/script></html>`;
-  closeExportModal();
-  const w=window.open('','_blank','width=1100,height=750');
-  w.document.write(printHTML); w.document.close();
+  return {monthData, reportTitle};
 }
+
+function generateReport() {
+  const {monthData, reportTitle} = getReportData();
+  if (!monthData.length) { alert('Tidak ada data untuk periode yang dipilih.'); return; }
+  closeExportModal();
+  if (currentFmt === 'excel') exportReportExcel(monthData, reportTitle);
+  else if (currentFmt === 'docs') exportReportDocs(monthData, reportTitle);
+  else exportReportPDF(monthData, reportTitle);
+}
+
+/* ════ SHARED SPM HELPERS ════ */
+const SPM_LAYANAN = [
+  "Layanan data dan pengaduan",
+  "Penyediaan layanan kedaruratan / layanan reaksi cepat",
+  "Penyediaan permakanan","Penyediaan sandang","Penyediaan Alat Bantu",
+  "Penyediaan perbekalan Kesehatan / Penyediaan P3K",
+  "Pemberian bimbingan fisik, mental, spiritual dan sosial untuk meningkatkan keberfungsian sosial",
+  "Pemberian bimbingan Sosial kepada keluarga Disabilitas",
+  "Fasilitas pembuatan nomor induk kependudukan, Kartu Tanda Penduduk, Akta Kelahiran, Surat Nikah, dan/atau Kartu Identitas Anak / Bukti Dokumen Kependudukan",
+  "Akses Pelayanan Pendidikan dan Kesehatan dasar / fasilitasi layanan Pendidikan dan kesehatan",
+  "Pemberian pelayanan penelusuran keluarga / Biometri",
+  "Pemberian pelayanan reunifikasi keluarga","Layanan rujukan"
+];
+const ALL_SPM_ROWS = [...SPM_LAYANAN, "Layanan Lainnya"];
+const FIXED_KEC_RPT = ["Batu","Bumiaji","Junrejo"];
+const isKecLainnyaRpt = kec => !FIXED_KEC_RPT.some(k=>k.toLowerCase()===(kec||'').trim().toLowerCase());
+function mapToSPMRpt(tl) {
+  if (!tl) return "Layanan Lainnya";
+  const t=tl.toLowerCase().trim();
+  const exact=SPM_LAYANAN.find(s=>s.toLowerCase()===t); if(exact)return exact;
+  if(t.includes('data')||t.includes('pengaduan'))return SPM_LAYANAN[0];
+  if(t.includes('kedaruratan')||t.includes('reaksi cepat'))return SPM_LAYANAN[1];
+  if(t.includes('permakanan')||t.includes('makan'))return SPM_LAYANAN[2];
+  if(t.includes('sandang')||t.includes('pakaian'))return SPM_LAYANAN[3];
+  if(t.includes('alat bantu'))return SPM_LAYANAN[4];
+  if(t.includes('p3k')||t.includes('perbekalan'))return SPM_LAYANAN[5];
+  if(t.includes('bimbingan')&&(t.includes('fisik')||t.includes('mental')||t.includes('spiritual'))&&!t.includes('disabilitas'))return SPM_LAYANAN[6];
+  if(t.includes('bimbingan')&&t.includes('disabilitas'))return SPM_LAYANAN[7];
+  if(t.includes('kependudukan')||t.includes('ktp')||t.includes('nik')||t.includes('akta')||t.includes('nikah')||t.includes('kia'))return SPM_LAYANAN[8];
+  if(t.includes('pendidikan')||t.includes('kesehatan dasar')||t.includes('fasilitasi layanan'))return SPM_LAYANAN[9];
+  if(t.includes('penelusuran')||t.includes('biometri'))return SPM_LAYANAN[10];
+  if(t.includes('reunifikasi'))return SPM_LAYANAN[11];
+  if(t.includes('rujukan'))return SPM_LAYANAN[12];
+  return "Layanan Lainnya";
+}
+function cntRpt(data,layanan,kec,jk){
+  return data.filter(d=>{
+    if(mapToSPMRpt((d.TINDAK_LANJUT||'').trim())!==layanan)return false;
+    const dk=(d.KECAMATAN_TEMUAN||'').trim();
+    if(kec==='Lainnya'){if(!isKecLainnyaRpt(dk))return false;}
+    else{if(dk.toLowerCase()!==kec.toLowerCase())return false;}
+    if(jk&&(d.JENIS_KELAMIN||'').trim().toUpperCase().charAt(0)!==jk)return false;
+    return true;
+  }).length;
+}
+function footKecRpt(ppksData){
+  return [...FIXED_KEC_RPT,'Lainnya'].map(kec=>{
+    const base=ppksData.filter(d=>{const dk=(d.KECAMATAN_TEMUAN||'').trim();return kec==='Lainnya'?isKecLainnyaRpt(dk):dk.toLowerCase()===kec.toLowerCase();});
+    return {l:base.filter(d=>(d.JENIS_KELAMIN||'').trim().toUpperCase().charAt(0)==='L').length,
+            p:base.filter(d=>(d.JENIS_KELAMIN||'').trim().toUpperCase().charAt(0)==='P').length};
+  });
+}
+
+/* ════ FORMAT 1: EXCEL ════ */
+function exportReportExcel(monthData,reportTitle){
+  const wb=XLSX.utils.book_new();
+  const ppksList=[...new Set(monthData.map(d=>(d.JENIS_PPKS||'').trim()).filter(Boolean))].sort();
+  ppksList.forEach(ppks=>{
+    const pd=monthData.filter(d=>(d.JENIS_PPKS||'').trim()===ppks);
+    const rows=[
+      ['NO','INDIKATOR KINERJA / JENIS PELAYANAN SPM','BATU','','BUMIAJI','','JUNREJO','','LAINNYA','','TOTAL','','TOTAL KESELURUHAN'],
+      ['','','L','P','L','P','L','P','L','P','L','P','']
+    ];
+    ALL_SPM_ROWS.forEach((layanan,idx)=>{
+      const cols=[...FIXED_KEC_RPT,'Lainnya'].map(kec=>({l:cntRpt(pd,layanan,kec,'L'),p:cntRpt(pd,layanan,kec,'P')}));
+      const sL=cols.reduce((a,c)=>a+c.l,0),sP=cols.reduce((a,c)=>a+c.p,0);
+      rows.push([idx+1,layanan,cols[0].l,cols[0].p,cols[1].l,cols[1].p,cols[2].l,cols[2].p,cols[3].l,cols[3].p,sL,sP,sL+sP]);
+    });
+    const fc=footKecRpt(pd);
+    const fL=fc.reduce((a,c)=>a+c.l,0),fP=fc.reduce((a,c)=>a+c.p,0);
+    rows.push(['','TOTAL',fc[0].l,fc[0].p,fc[1].l,fc[1].p,fc[2].l,fc[2].p,fc[3].l,fc[3].p,fL,fP,fL+fP]);
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!merges']=[
+      {s:{r:0,c:0},e:{r:1,c:0}},{s:{r:0,c:1},e:{r:1,c:1}},
+      {s:{r:0,c:2},e:{r:0,c:3}},{s:{r:0,c:4},e:{r:0,c:5}},
+      {s:{r:0,c:6},e:{r:0,c:7}},{s:{r:0,c:8},e:{r:0,c:9}},
+      {s:{r:0,c:10},e:{r:0,c:11}},{s:{r:0,c:12},e:{r:1,c:12}}
+    ];
+    ws['!cols']=[{wch:5},{wch:55},{wch:5},{wch:5},{wch:5},{wch:5},{wch:5},{wch:5},{wch:5},{wch:5},{wch:5},{wch:5},{wch:10}];
+    XLSX.utils.book_append_sheet(wb,ws,(ppks.length>28?ppks.substring(0,28):ppks));
+  });
+  XLSX.writeFile(wb,`Laporan_PPKS_${reportTitle.replace(/[^a-zA-Z0-9]/g,'_')}.xlsx`);
+}
+
+/* ════ FORMAT 2: WORD/DOCS ════ */
+function exportReportDocs(monthData,reportTitle){
+  const ppksList=[...new Set(monthData.map(d=>(d.JENIS_PPKS||'').trim()).filter(Boolean))].sort();
+  function buildDocTable(pd,label){
+    const tdc=(v,bold,bg,clr)=>`<td style="border:1px solid #000;padding:4px;text-align:center;${bold?'font-weight:bold;':''}${bg?'background:'+bg+';':''}${clr?'color:'+clr+';':''}">${v}</td>`;
+    const tdl=(v,italic)=>`<td style="border:1px solid #000;padding:4px 6px;${italic?'font-style:italic;':''}">${v}</td>`;
+    const h1=`<tr style="background:#1e40af;color:#fff;font-weight:bold;">
+      <td rowspan="2" style="border:1px solid #000;padding:4px;text-align:center;background:#1e40af;color:#fff;font-weight:bold;">NO</td>
+      <td rowspan="2" style="border:1px solid #000;padding:4px;background:#1e40af;color:#fff;font-weight:bold;">INDIKATOR KINERJA / JENIS PELAYANAN SPM</td>
+      ${[...FIXED_KEC_RPT,'Lainnya'].map(k=>`<td colspan="2" style="border:1px solid #000;padding:4px;text-align:center;background:#2563eb;color:#fff;font-weight:bold;">${k.toUpperCase()}</td>`).join('')}
+      <td colspan="2" style="border:1px solid #000;padding:4px;text-align:center;background:#1d4ed8;color:#fff;font-weight:bold;">TOTAL</td>
+      <td rowspan="2" style="border:1px solid #000;padding:4px;text-align:center;background:#1e3a8a;color:#fff;font-weight:bold;">TOTAL KESELURUHAN</td>
+    </tr>`;
+    const h2=`<tr>${[...FIXED_KEC_RPT,'Lainnya','TOTAL'].map(()=>`<td style="border:1px solid #000;padding:3px;text-align:center;background:#3b82f6;color:#fff;font-weight:bold;">L</td><td style="border:1px solid #000;padding:3px;text-align:center;background:#3b82f6;color:#fff;font-weight:bold;">P</td>`).join('')}</tr>`;
+    const body=ALL_SPM_ROWS.map((layanan,idx)=>{
+      const isL=layanan==="Layanan Lainnya";
+      const cols=[...FIXED_KEC_RPT,'Lainnya'].map(kec=>({l:cntRpt(pd,layanan,kec,'L'),p:cntRpt(pd,layanan,kec,'P')}));
+      const sL=cols.reduce((a,c)=>a+c.l,0),sP=cols.reduce((a,c)=>a+c.p,0);
+      return `<tr style="background:${isL?'#fff8e1':idx%2===0?'#fff':'#f4f7fb'};">
+        <td style="border:1px solid #000;text-align:center;padding:4px;color:#666;">${idx+1}</td>
+        ${tdl(layanan,isL)}
+        ${cols.map(c=>`${tdc(c.l)}${tdc(c.p)}`).join('')}
+        ${tdc(sL,true)}${tdc(sP,true)}${tdc(sL+sP,true,'','#1e40af')}
+      </tr>`;
+    }).join('');
+    const fc=footKecRpt(pd);
+    const fL=fc.reduce((a,c)=>a+c.l,0),fP=fc.reduce((a,c)=>a+c.p,0);
+    return `<p style="margin:16px 0 4px;font-weight:bold;color:#1e3a8a;background:#dbeafe;padding:6px 10px;border-left:4px solid #1e40af;">LAMPIRAN 2 \u2014 ${label.toUpperCase()}</p>
+    <table style="width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:20px;">
+      <thead>${h1}${h2}</thead><tbody>${body}</tbody>
+      <tfoot><tr style="background:#dbeafe;font-weight:bold;">
+        <td colspan="2" style="border:1px solid #000;padding:4px 8px;text-align:right;">TOTAL</td>
+        ${fc.map(c=>`${tdc(c.l,true)}${tdc(c.p,true)}`).join('')}${tdc(fL,true)}${tdc(fP,true)}${tdc(fL+fP,true,'','#1e40af')}
+      </tr></tfoot>
+    </table>`;
+  }
+  const tables=ppksList.map(p=>buildDocTable(monthData.filter(d=>(d.JENIS_PPKS||'').trim()===p),p)).join('');
+  const docHTML=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+  <head><meta charset='UTF-8'><meta name=ProgId content=Word.Document>
+  <style>body{font-family:Arial,sans-serif;font-size:10pt;margin:2cm;}@page{size:A3 landscape;margin:1.5cm;}</style></head>
+  <body>
+    <p style="text-align:center;font-size:13pt;font-weight:bold;text-transform:uppercase;color:#1e3a8a;margin:0 0 4px;">LAPORAN PELAYANAN TRC DINAS SOSIAL KOTA BATU</p>
+    <p style="text-align:center;font-size:11pt;margin-bottom:20px;">Periode: ${reportTitle}</p>
+    ${tables}
+    <p style="font-size:8pt;color:#6b7280;margin-top:24px;">Dicetak: ${new Date().toLocaleString('id-ID')}</p>
+  </body></html>`;
+  const blob=new Blob(['\ufeff'+docHTML],{type:'application/msword'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`Laporan_PPKS_${reportTitle.replace(/[^a-zA-Z0-9]/g,'_')}.doc`; a.click();
+}
+
+/* ════ FORMAT 3: PDF / CETAK ════ */
+function exportReportPDF(monthData,reportTitle){
+  const ppksList=[...new Set(monthData.map(d=>(d.JENIS_PPKS||'').trim()).filter(Boolean))].sort();
+  function buildL2(pd,label){
+    const td=(val,bold)=>`<td style="text-align:center;border:1px solid #b0b8c8;padding:4px 5px;font-size:10px;${bold?'font-weight:700;':''}">${val===0?'0':val}</td>`;
+    const thS=(txt,rs,cs,bg)=>`<th rowspan="${rs||1}" colspan="${cs||1}" style="border:1px solid #b0b8c8;padding:5px 4px;background:${bg||'#1e40af'};color:#fff;font-size:9.5px;font-weight:700;text-align:center;vertical-align:middle;">${txt}</th>`;
+    const kecH=[...FIXED_KEC_RPT,'Lainnya'].map(k=>thS(k.toUpperCase(),1,2,'#2563eb')).join('');
+    const lpH=[...FIXED_KEC_RPT,'Lainnya','TOTAL'].map(()=>'<th style="border:1px solid #b0b8c8;padding:4px 3px;background:#3b82f6;color:#fff;font-size:9px;text-align:center;">L</th><th style="border:1px solid #b0b8c8;padding:4px 3px;background:#3b82f6;color:#fff;font-size:9px;text-align:center;">P</th>').join('');
+    const rows=ALL_SPM_ROWS.map((layanan,idx)=>{
+      const isL=layanan==="Layanan Lainnya";
+      const cols=[...FIXED_KEC_RPT,'Lainnya'].map(kec=>({l:cntRpt(pd,layanan,kec,'L'),p:cntRpt(pd,layanan,kec,'P')}));
+      const sL=cols.reduce((a,c)=>a+c.l,0),sP=cols.reduce((a,c)=>a+c.p,0);
+      return `<tr style="background:${isL?'#fff8e1':idx%2===0?'#fff':'#f4f7fb'};">
+        <td style="border:1px solid #b0b8c8;text-align:center;padding:4px;font-size:10px;color:#6b7280;">${idx+1}</td>
+        <td style="border:1px solid #b0b8c8;padding:4px 7px;font-size:10px;${isL?'font-style:italic;color:#b45309;':''}">${layanan}</td>
+        ${cols.map(c=>`${td(c.l)}${td(c.p)}`).join('')}${td(sL)}${td(sP)}
+        <td style="text-align:center;border:1px solid #b0b8c8;padding:4px 5px;font-size:10px;font-weight:700;color:#1e40af;">${sL+sP}</td>
+      </tr>`;
+    }).join('');
+    const fc=footKecRpt(pd);
+    const fL=fc.reduce((a,c)=>a+c.l,0),fP=fc.reduce((a,c)=>a+c.p,0);
+    return `<div style="margin-bottom:28px;">
+      <div style="background:#1e3a8a;color:#fff;padding:8px 13px;font-weight:700;font-size:11px;border-radius:6px 6px 0 0;">LAMPIRAN 2 \u2014 ${label.toUpperCase()}</div>
+      <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:10px;">
+        <thead>
+          <tr style="background:#1e40af;color:#fff;">${thS('NO',2,1)}${thS('INDIKATOR KINERJA / JENIS PELAYANAN SPM',2,1)}${kecH}${thS('TOTAL',1,2,'#1d4ed8')}${thS('TOTAL KESELURUHAN',2,1,'#1e3a8a')}</tr>
+          <tr>${lpH}</tr>
+        </thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr style="background:#dbeafe;font-weight:700;">
+          <td colspan="2" style="border:1px solid #b0b8c8;padding:5px 10px;text-align:right;font-size:10px;font-weight:700;">TOTAL</td>
+          ${fc.map(c=>`${td(c.l,true)}${td(c.p,true)}`).join('')}${td(fL,true)}${td(fP,true)}
+          <td style="text-align:center;border:1px solid #b0b8c8;padding:5px;font-weight:700;color:#1e40af;font-size:10px;">${fL+fP}</td>
+        </tr></tfoot>
+      </table></div>
+    </div>`;
+  }
+  const allT=ppksList.map(p=>buildL2(monthData.filter(d=>(d.JENIS_PPKS||'').trim()===p),p)).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Laporan PPKS \u2013 ${reportTitle}</title>
+  <style>body{font-family:Arial,sans-serif;margin:0;padding:18px 22px;font-size:10px;color:#111;}
+  @media print{@page{size:A3 landscape;margin:1.2cm;}body{padding:0;}}</style>
+  </head><body>
+    <div style="text-align:center;margin-bottom:20px;border-bottom:2px solid #1e40af;padding-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;text-transform:uppercase;color:#1e3a8a;">LAPORAN PELAYANAN TRC DINAS SOSIAL KOTA BATU</div>
+      <div style="font-size:11px;font-weight:600;margin-top:4px;">Periode: ${reportTitle}</div>
+    </div>
+    ${allT}
+    <p style="margin-top:20px;font-size:9px;color:#6b7280;">Dicetak: ${new Date().toLocaleString('id-ID')}</p>
+  </body><script>window.onload=function(){window.print();}<\/script></html>`;
+  const w=window.open('','_blank','width=1200,height=800');
+  w.document.write(html); w.document.close();
+}
+
 
 /* ══════════════════════════════════════════
    INIT
