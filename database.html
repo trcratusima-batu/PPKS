@@ -267,18 +267,30 @@ tbody tr:nth-child(even){background:var(--surface2);}
 .info-box i{color:var(--indigo);margin-right:5px;}
 
 /* ══ RESPONSIVE ══ */
-@media(max-width:900px){.sidebar{display:none;}.stats-top{grid-template-columns:1fr;}.page-content{padding:14px;}.topbar{padding:11px 14px;}}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99;}
+.sidebar-overlay.open{display:block;}
+.sidebar{transition:transform .25s ease;}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--text2);font-size:20px;line-height:1;}
+@media(max-width:900px){
+  .sidebar{position:fixed;top:0;left:0;height:100vh;z-index:100;transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .stats-top{grid-template-columns:1fr;}
+  .page-content{padding:14px;}
+  .topbar{padding:11px 14px;}
+  .hamburger{display:flex;align-items:center;justify-content:center;}
+}
 @media(max-width:600px){.stats-grid{grid-template-columns:repeat(2,1fr);}.profil-grid{grid-template-columns:1fr;}}
 @media print{body *{visibility:hidden;}#printArea,#printArea *{visibility:visible;}#printArea{position:fixed;top:0;left:0;width:100%;}}
 </style>
 </head>
 <body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="layout">
 
 <!-- ═══════════ SIDEBAR ═══════════ -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Logo_Kota_Batu.png/200px-Logo_Kota_Batu.png" onerror="this.style.display='none'" alt="">
+    <img src="https://drive.google.com/thumbnail?id=1jxAPlpHaXSyfNEWgiSgGtlPgpM5A2MEv&sz=w80" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Logo_Kota_Batu.png/200px-Logo_Kota_Batu.png'" alt="Logo TRC">
     <div class="logo-text">
       <strong>PPKS Kota Batu</strong>
       <span>Dinas Sosial</span>
@@ -312,6 +324,7 @@ tbody tr:nth-child(even){background:var(--surface2);}
 <!-- ═══════════ MAIN ═══════════ -->
 <div class="main">
   <header class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()" title="Menu"><i class="fa-solid fa-bars"></i></button>
     <div class="topbar-title">Database <span>PPKS</span> – Kota Batu</div>
     <div class="topbar-right">
       <div class="topbar-meta">
@@ -1241,19 +1254,25 @@ function calClick(day) {
       ${items.map(d=>`<li style="font-size:12.5px;margin-bottom:3px;">${d.NAMA} — <span style="color:var(--indigo)">${d.JENIS_PPKS||'–'}</span></li>`).join('')}
     </ul>
     <div style="margin-top:8px;">
-      <button class="btn btn-primary btn-sm" onclick="filterByDate(`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`)">
+      <button class="btn btn-primary btn-sm" onclick="filterByDate((calYear)+'-'+('0'+(calMonth+1)).slice(-2)+'-'+('0'+day).slice(-2))">
         <i class="fa-solid fa-filter"></i> Tampilkan di tabel
       </button>
     </div>`;
 }
 
 function filterByDate(dateStr) {
+  showPage('database');
   document.getElementById('fTglMulai').value = dateStr;
   document.getElementById('fTglAkhir').value = dateStr;
   applyFilter();
-  showPage('database');
 }
 
+function toggleSidebar() {
+  const sb = document.querySelector('.sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+}
 function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderKalender(); }
 function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderKalender(); }
 
