@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Database PPKS – Kota Batu (v5)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* ══════════════════════════════════════ TOKENS ══ */
+:root {
+  --bg:#f0f3f8; --surface:#fff; --surface2:#f7f9fc;
+  --border:#e3e8ef; --border2:#cdd5df;
+  --text:#0e1726; --text2:#2d3a4a; --muted:#5c7089; --muted2:#94a3b8;
+  --indigo:#4f46e5; --indigo-d:#3730a3; --indigo-l:#eef2ff;
+  --sky:#0ea5e9; --sky-l:#e0f2fe;
+  --emerald:#059669; --emerald-l:#d1fae5;
+  --amber:#d97706; --amber-l:#fef3c7;
+  --rose:#e11d48; --rose-l:#ffe4e6;
+  --violet:#7c3aed; --violet-l:#ede9fe;
+  --teal:#0d9488; --teal-l:#ccfbf1;
+  --orange:#ea580c; --orange-l:#ffedd5;
+  --pink:#db2777; --pink-l:#fce7f3;
+  --lime:#65a30d; --lime-l:#ecfccb;
+  --cyan:#0891b2; --cyan-l:#cffafe;
+  --r:10px; --r2:14px; --r3:18px;
+  --shadow:0 1px 4px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --shadow2:0 4px 20px rgba(0,0,0,.09),0 1px 4px rgba(0,0,0,.04);
+  --shadow3:0 12px 44px rgba(0,0,0,.14);
+  --sidebar-bg:linear-gradient(170deg,#1e1b5e 0%,#3730a3 60%,#4f46e5 100%);
+  --new-badge:#10b981;
+}
+[data-theme="dark"] {
+  --bg:#0f1117; --surface:#1a1d2e; --surface2:#232640;
+  --border:#2a2d45; --border2:#363a5a;
+  --text:#e8eaf6; --text2:#b0b8d8; --muted:#7880a4; --muted2:#555e84;
+  --indigo:#6366f1; --indigo-d:#4f46e5; --indigo-l:#1e1b4b;
+  --sky:#38bdf8; --sky-l:#0c2a3e;
+  --emerald:#34d399; --emerald-l:#052e16;
+  --amber:#fbbf24; --amber-l:#2d1b00;
+  --rose:#fb7185; --rose-l:#3b0a14;
+  --violet:#a78bfa; --violet-l:#2e1065;
+  --shadow:0 1px 4px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);
+  --shadow2:0 4px 20px rgba(0,0,0,.4),0 1px 4px rgba(0,0,0,.3);
+  --shadow3:0 12px 44px rgba(0,0,0,.5);
+  --sidebar-bg:linear-gradient(170deg,#0d0b2e 0%,#1a1660 60%,#2d29a0 100%);
+}
+
+/* ══ RESET ══ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh;transition:background .2s,color .2s;}
+
+/* ══ LAYOUT ══ */
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:248px;background:var(--sidebar-bg);flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;box-shadow:2px 0 20px rgba(79,70,229,.18);transition:background .2s;}
+.sidebar-logo{padding:22px 18px 18px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:12px;}
+.sidebar-logo img{width:42px;height:42px;border-radius:10px;object-fit:cover;box-shadow:0 2px 10px rgba(0,0,0,.25);}
+.logo-text strong{display:block;font-size:13.5px;font-weight:700;color:#fff;line-height:1.3;}
+.logo-text span{font-size:10.5px;opacity:.55;color:#fff;font-weight:400;}
+.sidebar-nav{padding:14px 10px;flex:1;}
+.nav-label{font-size:9px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:rgba(255,255,255,.32);padding:10px 10px 5px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r);color:rgba(255,255,255,.58);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:2px;}
+.nav-item:hover{background:rgba(255,255,255,.1);color:#fff;}
+.nav-item.active{background:rgba(255,255,255,.16);color:#fff;font-weight:600;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);}
+.nav-item i{width:17px;text-align:center;font-size:13px;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center;}
+.sidebar-footer{padding:14px;border-top:1px solid rgba(255,255,255,.08);font-size:10.5px;color:rgba(255,255,255,.28);text-align:center;line-height:1.7;}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:50;box-shadow:0 1px 8px rgba(0,0,0,.05);transition:background .2s,border-color .2s;}
+.topbar-title{font-family:'DM Serif Display',serif;font-size:18px;letter-spacing:-.2px;}
+.topbar-title span{color:var(--indigo);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.topbar-meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:14px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--emerald);display:inline-block;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+.dark-toggle{width:34px;height:34px;border-radius:var(--r);background:var(--surface2);border:1.5px solid var(--border2);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;}
+.dark-toggle:hover{border-color:var(--indigo);color:var(--indigo);}
+
+/* ══ PAGES ══ */
+.page{display:none;}
+.page.active{display:block;}
+.page-content{padding:24px 28px;flex:1;}
+
+/* ══ STATS ══ */
+.stats-section{margin-bottom:26px;}
+.stats-heading{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.stats-top{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;transition:box-shadow .15s,transform .15s;cursor:default;}
+.stat-card:hover{box-shadow:var(--shadow2);transform:translateY(-1px);}
+.sc-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:10px;}
+.sc-val{font-family:'DM Serif Display',serif;font-size:26px;font-weight:400;line-height:1;margin-bottom:4px;}
+.sc-label{font-size:11px;color:var(--muted);font-weight:500;line-height:1.4;}
+.stat-card.big{padding:20px 22px;display:flex;align-items:center;gap:16px;}
+.stat-card.big .sc-icon{width:50px;height:50px;font-size:20px;margin-bottom:0;flex-shrink:0;border-radius:12px;}
+.stat-card.big .sc-val{font-size:36px;}
+.sc-indigo .sc-icon{background:var(--indigo-l);color:var(--indigo);}
+.sc-indigo .sc-val{color:var(--indigo);}
+.sc-sky .sc-icon{background:var(--sky-l);color:var(--sky);}
+.sc-sky .sc-val{color:var(--sky);}
+.sc-emerald .sc-icon{background:var(--emerald-l);color:var(--emerald);}
+.sc-emerald .sc-val{color:var(--emerald);}
+.sc-rose .sc-icon{background:var(--rose-l);color:var(--rose);}
+.sc-rose .sc-val{color:var(--rose);}
+.sc-amber .sc-icon{background:var(--amber-l);color:var(--amber);}
+.sc-amber .sc-val{color:var(--amber);}
+.sc-violet .sc-icon{background:var(--violet-l);color:var(--violet);}
+.sc-violet .sc-val{color:var(--violet);}
+.sc-teal .sc-icon{background:var(--teal-l);color:var(--teal);}
+.sc-teal .sc-val{color:var(--teal);}
+.sc-orange .sc-icon{background:var(--orange-l);color:var(--orange);}
+.sc-orange .sc-val{color:var(--orange);}
+.sc-pink .sc-icon{background:var(--pink-l);color:var(--pink);}
+.sc-pink .sc-val{color:var(--pink);}
+.sc-lime .sc-icon{background:var(--lime-l);color:var(--lime);}
+.sc-lime .sc-val{color:var(--lime);}
+.sc-cyan .sc-icon{background:var(--cyan-l);color:var(--cyan);}
+.sc-cyan .sc-val{color:var(--cyan);}
+
+/* ══ PANEL ══ */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:18px 20px;margin-bottom:20px;box-shadow:var(--shadow);transition:background .2s,border-color .2s;}
+.panel-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
+.panel-title{font-family:'DM Serif Display',serif;font-size:15px;display:flex;align-items:center;gap:8px;}
+.panel-title i{color:var(--indigo);font-size:13px;font-style:normal;}
+
+/* ══ FILTER GRIDS ══ */
+.filter-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:end;}
+.filter-grid-row2{display:grid;grid-template-columns:repeat(3,1fr) 1fr 1fr auto;gap:10px;align-items:end;margin-top:10px;}
+@media(max-width:1100px){.filter-grid,.filter-grid-row2{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:700px){.filter-grid,.filter-grid-row2{grid-template-columns:1fr 1fr;}}
+.sort-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.sort-row label{font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap;}
+.sort-row .form-select{width:auto;min-width:155px;height:34px;font-size:12.5px;}
+.sort-dir-btn{height:34px;width:34px;border:1.5px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .12s;flex-shrink:0;}
+.sort-dir-btn:hover{border-color:var(--indigo);color:var(--indigo);}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.2px;}
+.form-control,.form-select{border:1.5px solid var(--border2);border-radius:var(--r);padding:7px 11px;font-family:inherit;font-size:13px;color:var(--text);background:var(--surface);transition:border-color .15s,box-shadow .15s;width:100%;height:36px;}
+.form-control:focus,.form-select:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 3px rgba(79,70,229,.12);}
+
+/* ══ BUTTONS ══ */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;height:36px;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--indigo);color:#fff;}
+.btn-primary:hover{background:var(--indigo-d);}
+.btn-ghost{background:transparent;color:var(--text2);border:1.5px solid var(--border2);}
+.btn-ghost:hover{background:var(--surface2);}
+.btn-success{background:var(--emerald);color:#fff;}
+.btn-success:hover{background:#047857;}
+.btn-sky{background:var(--sky);color:#fff;}
+.btn-sky:hover{background:#0284c7;}
+.btn-sm{padding:5px 11px;font-size:12px;height:30px;}
+
+/* ══ TABLE ══ */
+.table-wrap{overflow-x:auto;margin:0 -2px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:var(--indigo-d);color:rgba(255,255,255,.92);padding:9px 12px;font-size:11px;font-weight:600;letter-spacing:.3px;white-space:nowrap;text-align:left;position:sticky;top:0;}
+thead th:first-child{border-radius:7px 0 0 0;}
+thead th:last-child{border-radius:0 7px 0 0;}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#f4f6ff;}
+[data-theme="dark"] tbody tr:hover{background:#1e2240;}
+tbody td{padding:9px 12px;vertical-align:top;}
+tbody tr:nth-child(even){background:var(--surface2);}
+.td-tl{font-size:12px;line-height:1.5;min-width:150px;max-width:210px;word-wrap:break-word;white-space:normal;}
+.row-new td:first-child::after{content:"BARU";background:var(--new-badge);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:middle;}
+
+/* ══ BADGES ══ */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:600;white-space:nowrap;}
+.badge::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;}
+.b-0{background:#fef3c7;color:#92400e}.b-1{background:#dbeafe;color:#1e40af}.b-2{background:#fce7f3;color:#9d174d}.b-3{background:#d1fae5;color:#065f46}.b-4{background:#ede9fe;color:#4c1d95}.b-5{background:#ffe4e6;color:#9f1239}.b-6{background:#cffafe;color:#164e63}.b-7{background:#fef9c3;color:#854d0e}.b-8{background:#e0f2fe;color:#0c4a6e}.b-9{background:#fdf2f8;color:#86198f}.b-10{background:#ccfbf1;color:#134e4a}.b-11{background:#ffedd5;color:#7c2d12}.b-12{background:#f0fdf4;color:#14532d}.b-13{background:#f5f3ff;color:#3b0764}.b-14{background:#fef2f2;color:#7f1d1d}.b-15{background:#fff7ed;color:#7c2d12}.b-16{background:#fdf4ff;color:#581c87}.b-17{background:#fff1f2;color:#881337}.b-18{background:#fef2f2;color:#991b1b}.b-19{background:#eff6ff;color:#1e3a8a}.b-20{background:#fff7ed;color:#9a3412}.b-21{background:#fef3c7;color:#78350f}.b-22{background:#fdf2f8;color:#831843}.b-23{background:#ecfdf5;color:#065f46}.b-24{background:#f0f9ff;color:#075985}.b-25{background:#fafafa;color:#374151}.b-26{background:#e0f2fe;color:#0369a1}.b-def{background:#f1f5f9;color:#64748b;}
+
+/* ══ PAGINATION ══ */
+.pagination{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.pagination-left{font-size:12px;color:var(--muted);}
+.pagination-right{display:flex;gap:4px;flex-wrap:wrap;}
+.pg-btn{min-width:30px;height:30px;padding:0 7px;border:1.5px solid var(--border2);border-radius:7px;background:var(--surface);color:var(--text2);font-size:12.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:all .12s;}
+.pg-btn:hover{border-color:var(--indigo);color:var(--indigo);}
+.pg-btn.active{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+.pg-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ══ MODAL ══ */
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(16,24,40,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+.modal-backdrop.open{display:flex;}
+.modal-box{background:var(--surface);border-radius:var(--r3);padding:26px 30px;width:520px;max-width:96vw;box-shadow:var(--shadow3);animation:slideUp .2s ease;max-height:90vh;overflow-y:auto;}
+@keyframes slideUp{from{transform:translateY(18px);opacity:0;}}
+.modal-title{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.modal-title i{color:var(--emerald);}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+.month-range-toggle{margin-bottom:12px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);}
+.month-range-toggle input{cursor:pointer;accent-color:var(--indigo);}
+
+/* ══ PROFIL MODAL ══ */
+.profil-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.profil-kv{background:var(--surface2);border-radius:var(--r);padding:10px 12px;border:1px solid var(--border);}
+.profil-kv .pk-label{font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
+.profil-kv .pk-val{font-size:13.5px;color:var(--text);font-weight:500;line-height:1.4;}
+.profil-kv.full{grid-column:1/-1;}
+.riwayat-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 13px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;}
+.riwayat-date{font-size:11px;font-weight:700;color:var(--indigo);white-space:nowrap;min-width:72px;}
+.riwayat-body{flex:1;}
+.riwayat-body .rj{font-size:12px;font-weight:600;color:var(--text);}
+.riwayat-body .rl{font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+/* ══ LOADING ══ */
+.spinner-row td{text-align:center;padding:60px 20px;color:var(--muted);}
+.spin{display:inline-block;width:22px;height:22px;border:3px solid var(--border2);border-top-color:var(--indigo);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty-row td{text-align:center;padding:60px 20px;color:var(--muted);font-size:13px;}
+
+/* ══ STATISTIK ══ */
+.stat-page-header{margin-bottom:22px;}
+.stat-page-header h1{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);margin-bottom:3px;}
+.stat-page-header p{font-size:13px;color:var(--muted);}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.chart-full{grid-column:1/-1;}
+@media(max-width:880px){.charts-grid{grid-template-columns:1fr;}.chart-full{grid-column:1;}}
+.chart-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:18px 20px;box-shadow:var(--shadow);}
+.chart-panel-title{font-family:'DM Serif Display',serif;font-size:14px;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:7px;}
+.chart-panel-title i{color:var(--indigo);font-size:12px;font-style:normal;}
+.chart-panel-sub{font-size:11.5px;color:var(--muted);margin-bottom:14px;}
+.chart-container{position:relative;width:100%;}
+.chart-container canvas{width:100%!important;}
+.stat-kv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:9px;margin-bottom:20px;}
+.stat-kv{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:13px 15px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px;}
+.kv-val{font-family:'DM Serif Display',serif;font-size:26px;color:var(--indigo);line-height:1;}
+.kv-label{font-size:10.5px;color:var(--muted);font-weight:500;line-height:1.4;}
+
+/* ══ PETA ══ */
+#mapContainer{height:480px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);}
+.map-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.map-legend-item{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text2);}
+.map-legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.map-filter-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-end;}
+.map-filter-row .field{min-width:160px;}
+
+/* ══ KALENDER ══ */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.cal-nav-title{font-family:'DM Serif Display',serif;font-size:18px;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-header{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding:4px 0;text-transform:uppercase;letter-spacing:.5px;}
+.cal-day{background:var(--surface2);border:1px solid var(--border);border-radius:8px;min-height:68px;padding:6px 8px;cursor:pointer;transition:all .15s;position:relative;}
+.cal-day:hover{border-color:var(--indigo);box-shadow:var(--shadow2);}
+.cal-day.today{border-color:var(--indigo);background:var(--indigo-l);}
+.cal-day.other-month{opacity:.35;}
+.cal-day.has-data{border-color:rgba(79,70,229,.3);}
+.cal-day.selected{background:var(--indigo-l);border-color:var(--indigo);}
+.cal-day-num{font-size:12px;font-weight:700;color:var(--text2);}
+.cal-day.today .cal-day-num{color:var(--indigo);}
+.cal-count{font-family:'DM Serif Display',serif;font-size:20px;color:var(--indigo);line-height:1.1;}
+.cal-count-label{font-size:9.5px;color:var(--muted);}
+.cal-selected-info{background:var(--indigo-l);border:1px solid var(--indigo);border-radius:var(--r);padding:10px 14px;margin-top:12px;font-size:13px;color:var(--indigo-d);display:none;}
+.cal-selected-info.show{display:block;}
+
+/* ══ MISC ══ */
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:600;background:var(--indigo-l);color:var(--indigo);}
+.divider{height:1px;background:var(--border);margin:16px 0;}
+.info-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--muted);line-height:1.6;}
+.info-box i{color:var(--indigo);margin-right:5px;}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){.sidebar{display:none;}.stats-top{grid-template-columns:1fr;}.page-content{padding:14px;}.topbar{padding:11px 14px;}}
+@media(max-width:600px){.stats-grid{grid-template-columns:repeat(2,1fr);}.profil-grid{grid-template-columns:1fr;}}
+@media print{body *{visibility:hidden;}#printArea,#printArea *{visibility:visible;}#printArea{position:fixed;top:0;left:0;width:100%;}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Logo_Kota_Batu.png/200px-Logo_Kota_Batu.png" onerror="this.style.display='none'" alt="">
+    <div class="logo-text">
+      <strong>PPKS Kota Batu</strong>
+      <span>Dinas Sosial</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-label">Menu Utama</div>
+    <div class="nav-item active" id="nav-database" onclick="showPage('database')">
+      <i class="fa-solid fa-database"></i> Database PPKS
+    </div>
+    <div class="nav-item" id="nav-statistik" onclick="showPage('statistik')">
+      <i class="fa-solid fa-chart-pie"></i> Statistik
+    </div>
+    <div class="nav-item" id="nav-peta" onclick="showPage('peta')">
+      <i class="fa-solid fa-map-location-dot"></i> Peta Persebaran
+    </div>
+    <div class="nav-item" id="nav-kalender" onclick="showPage('kalender')">
+      <i class="fa-solid fa-calendar-days"></i> Kalender Aktivitas
+    </div>
+    <div class="nav-label" style="margin-top:8px;">Aksi</div>
+    <div class="nav-item" onclick="openExportModal()">
+      <i class="fa-solid fa-file-excel"></i> Export Laporan
+    </div>
+    <div class="nav-item" onclick="exportExcel()">
+      <i class="fa-solid fa-table"></i> Export Excel (.xlsx)
+    </div>
+  </nav>
+  <div class="sidebar-footer">Sistem Informasi PPKS<br>Kota Batu © 2025<br><span style="opacity:.45;font-size:9px;">v5 · mapping presisi</span></div>
+</aside>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title">Database <span>PPKS</span> – Kota Batu</div>
+    <div class="topbar-right">
+      <div class="topbar-meta">
+        <span><span class="dot"></span> Live</span>
+        <span id="lastUpdate" style="color:var(--muted2)">Memuat…</span>
+      </div>
+      <button class="dark-toggle" onclick="toggleDark()" id="darkBtn" title="Dark/Light mode">
+        <i class="fa-solid fa-moon" id="darkIcon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ════ PAGE: DATABASE ════ -->
+  <main class="page-content page active" id="page-database">
+    <section class="stats-section">
+      <div class="stats-heading">Ringkasan Data</div>
+      <div class="stats-top">
+        <div class="stat-card big sc-indigo">
+          <div class="sc-icon"><i class="fa-solid fa-database"></i></div>
+          <div>
+            <div class="sc-val" id="st-total">–</div>
+            <div class="sc-label">Total Entri Data</div>
+          </div>
+        </div>
+        <div class="stat-card big sc-sky">
+          <div class="sc-icon"><i class="fa-solid fa-users"></i></div>
+          <div>
+            <div class="sc-val" id="st-unik">–</div>
+            <div class="sc-label">Individu Unik</div>
+          </div>
+        </div>
+      </div>
+      <div class="stats-grid" id="categoryStats"></div>
+    </section>
+
+    <!-- Filter -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><i class="fa-solid fa-filter"></i> Filter Data</div>
+        <button class="btn btn-ghost btn-sm" onclick="resetFilter()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+      </div>
+      <div class="filter-grid">
+        <div class="field"><label>Cari Nama / NIK</label><input type="text" id="fSearch" class="form-control" placeholder="Ketik nama atau NIK…"></div>
+        <div class="field"><label>Jenis PPKS</label><select id="fJenis" class="form-select"><option value="">– Semua Jenis –</option></select></div>
+        <div class="field"><label>Kecamatan Temuan</label><select id="fKecamatan" class="form-select"><option value="">– Semua –</option></select></div>
+      </div>
+      <div class="filter-grid-row2">
+        <div class="field"><label>Kota / Kab</label><select id="fKota" class="form-select" onchange="onKotaChange()"><option value="">– Semua Kota –</option></select></div>
+        <div class="field"><label>Kecamatan</label><select id="fKec" class="form-select" onchange="onKecChange()"><option value="">– Semua –</option></select></div>
+        <div class="field"><label>Desa / Kelurahan</label><select id="fDesa" class="form-select" onchange="applyFilter()"><option value="">– Semua –</option></select></div>
+        <div class="field"><label>Dari Tanggal</label><input type="date" id="fTglMulai" class="form-control"></div>
+        <div class="field"><label>Sampai Tanggal</label><input type="date" id="fTglAkhir" class="form-control"></div>
+        <div class="field"><label>Jenis Kelamin</label><select id="fJK" class="form-select"><option value="">– Semua –</option><option>Laki-laki</option><option>Perempuan</option></select></div>
+        <div class="field" style="justify-content:flex-end;"><button class="btn btn-primary" onclick="applyFilter()"><i class="fa-solid fa-magnifying-glass"></i> Filter</button></div>
+      </div>
+    </div>
+
+    <!-- Tabel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title"><i class="fa-solid fa-table-list"></i> Data PPKS</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span id="recordInfo" style="font-size:12px;color:var(--muted);"></span>
+          <button class="btn btn-sky btn-sm" onclick="exportExcel()"><i class="fa-solid fa-table"></i> Export .xlsx</button>
+          <button class="btn btn-success btn-sm" onclick="openExportModal()"><i class="fa-solid fa-print"></i> Cetak Laporan</button>
+        </div>
+      </div>
+      <div class="sort-row">
+        <label><i class="fa-solid fa-arrow-up-wide-short" style="color:var(--indigo);margin-right:3px;"></i> Urutkan:</label>
+        <select id="sortColSel" class="form-select" onchange="onSortChange()">
+          <option value="TANGGAL">Tanggal</option><option value="NAMA">Nama</option>
+          <option value="NIK">NIK</option><option value="JENIS_PPKS">Jenis PPKS</option>
+          <option value="KECAMATAN_TEMUAN">Kec. Temuan</option><option value="KOTA">Kota / Kab</option>
+          <option value="KECAMATAN">Kecamatan</option><option value="TINDAK_LANJUT">Tindak Lanjut</option>
+        </select>
+        <button class="sort-dir-btn" onclick="toggleSortDir()"><i class="fa-solid fa-arrow-down-short-wide" id="sortDirIcon"></i></button>
+        <span style="font-size:12px;color:var(--muted);" id="sortLabel">Terbaru → Terlama</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11.5px;color:var(--muted);">Tampil baru 7 hari:</span>
+          <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;">
+            <input type="checkbox" id="chkShowNew" style="accent-color:var(--emerald);" onchange="sortAndRender()"> Highlight
+          </label>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th><th>Tanggal</th><th>NIK</th><th>Nama</th><th>JK</th>
+              <th>Kec. Temuan</th><th>Kota / Kab</th><th>Kecamatan</th><th>Desa</th>
+              <th>Alamat</th><th>Jenis PPKS</th><th>Tindak Lanjut</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr class="spinner-row"><td colspan="12"><span class="spin"></span> Memuat data…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" id="paginationBar">
+        <div class="pagination-left" id="paginationInfo"></div>
+        <div class="pagination-right" id="paginationBtns"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ════ PAGE: STATISTIK ════ -->
+  <main class="page-content page" id="page-statistik">
+    <div class="stat-page-header">
+      <h1><i class="fa-solid fa-chart-pie" style="color:var(--indigo);margin-right:8px;"></i>Statistik PPKS</h1>
+      <p>Visualisasi data Penyandang Permasalahan Kesejahteraan Sosial – Kota Batu</p>
+    </div>
+    <div class="stat-kv-grid" id="statKvGrid"></div>
+    <div class="charts-grid">
+      <div class="chart-panel">
+        <div class="chart-panel-title"><i class="fa-solid fa-circle-half-stroke"></i> Distribusi Jenis PPKS</div>
+        <div class="chart-panel-sub">Komposisi per kategori</div>
+        <div class="chart-container" style="height:300px;display:flex;align-items:center;justify-content:center;"><canvas id="chartDonut"></canvas></div>
+      </div>
+      <div class="chart-panel">
+        <div class="chart-panel-title"><i class="fa-solid fa-venus-mars"></i> Gender per Jenis PPKS (Top 10)</div>
+        <div class="chart-panel-sub">Sebaran jenis kelamin</div>
+        <div class="chart-container" style="height:300px;"><canvas id="chartGender"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-panel chart-full">
+        <div class="chart-panel-title"><i class="fa-solid fa-chart-line"></i> Tren Data Per Bulan</div>
+        <div class="chart-panel-sub">Jumlah entri masuk per bulan</div>
+        <div class="chart-container" style="height:240px;"><canvas id="chartTime"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-panel">
+        <div class="chart-panel-title"><i class="fa-solid fa-bars"></i> Tindak Lanjut / Layanan</div>
+        <div class="chart-panel-sub">Frekuensi per jenis layanan</div>
+        <div class="chart-container" style="height:320px;"><canvas id="chartLayanan"></canvas></div>
+      </div>
+      <div class="chart-panel">
+        <div class="chart-panel-title"><i class="fa-solid fa-map-location-dot"></i> Sebaran Kecamatan Temuan</div>
+        <div class="chart-panel-sub">Jumlah PPKS per kecamatan</div>
+        <div class="chart-container" style="height:320px;"><canvas id="chartKec"></canvas></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ════ PAGE: PETA ════ -->
+  <main class="page-content page" id="page-peta">
+    <div class="stat-page-header">
+      <h1><i class="fa-solid fa-map-location-dot" style="color:var(--indigo);margin-right:8px;"></i>Peta Persebaran PPKS</h1>
+      <p>Distribusi geografis berdasarkan alamat — klik marker untuk detail</p>
+    </div>
+    <div class="panel">
+      <div class="map-filter-row">
+        <div class="field"><label>Filter Jenis PPKS</label><select id="mapFJenis" class="form-select" onchange="renderPeta()"><option value="">– Semua –</option></select></div>
+        <div class="field"><label>Filter Kecamatan Temuan</label><select id="mapFKec" class="form-select" onchange="renderPeta()"><option value="">– Semua –</option></select></div>
+        <div class="field" style="justify-content:flex-end;"><button class="btn btn-ghost btn-sm" onclick="resetMapFilter()"><i class="fa-solid fa-rotate-left"></i> Reset</button></div>
+      </div>
+      <div id="mapContainer"></div>
+      <div class="map-legend" id="mapLegend"></div>
+    </div>
+  </main>
+
+  <!-- ════ PAGE: KALENDER ════ -->
+  <main class="page-content page" id="page-kalender">
+    <div class="stat-page-header">
+      <h1><i class="fa-solid fa-calendar-days" style="color:var(--indigo);margin-right:8px;"></i>Kalender Aktivitas</h1>
+      <p>Klik tanggal untuk melihat data masuk pada hari tersebut</p>
+    </div>
+    <div class="panel">
+      <div class="cal-nav">
+        <button class="btn btn-ghost btn-sm" onclick="calPrev()"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="cal-nav-title" id="calTitle"></div>
+        <button class="btn btn-ghost btn-sm" onclick="calNext()"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-selected-info" id="calInfo"></div>
+    </div>
+  </main>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- ═══════════ EXPORT MODAL ═══════════ -->
+<div class="modal-backdrop" id="exportModal">
+  <div class="modal-box">
+    <div class="modal-title"><i class="fa-solid fa-print"></i> Cetak Laporan Bulanan</div>
+    <label class="month-range-toggle"><input type="checkbox" id="useRange"> Gunakan rentang bulan</label>
+    <div id="singleMonthBlock">
+      <div class="modal-row">
+        <div class="field"><label>Bulan</label><select id="expBulan" class="form-select"></select></div>
+        <div class="field"><label>Tahun</label><select id="expTahun" class="form-select"></select></div>
+      </div>
+    </div>
+    <div id="rangeMonthBlock" style="display:none;">
+      <div class="modal-row">
+        <div class="field"><label>Dari Bulan</label><select id="expBulanDari" class="form-select"></select></div>
+        <div class="field"><label>Tahun</label><select id="expTahunDari" class="form-select"></select></div>
+      </div>
+      <div class="modal-row">
+        <div class="field"><label>Sampai Bulan</label><select id="expBulanSampai" class="form-select"></select></div>
+        <div class="field"><label>Tahun</label><select id="expTahunSampai" class="form-select"></select></div>
+      </div>
+    </div>
+    <div class="info-box"><i class="fa-solid fa-circle-info"></i> Rekap per jenis PPKS & layanan, dikelompokkan per kecamatan (Batu, Bumiaji, Junrejo + Lainnya).</div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeExportModal()">Batal</button>
+      <button class="btn btn-success" onclick="generateReport()"><i class="fa-solid fa-print"></i> Buat & Cetak</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PROFIL MODAL ═══════════ -->
+<div class="modal-backdrop" id="profilModal">
+  <div class="modal-box" style="width:600px;">
+    <div class="modal-title"><i class="fa-solid fa-id-card" style="color:var(--indigo);"></i> <span id="profilNama"></span></div>
+    <div class="profil-grid" id="profilGrid"></div>
+    <div class="divider"></div>
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">
+      <i class="fa-solid fa-clock-rotate-left" style="color:var(--indigo);margin-right:5px;"></i> Riwayat Layanan
+    </div>
+    <div id="riwayatList"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeProfilModal()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<div id="printArea" style="display:none;"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   CONFIG & CONSTANTS
+══════════════════════════════════════════ */
+const API_URL = "https://script.google.com/macros/s/AKfycbz7o4RXsBAzyon34taMdP_HSHY_7E2a-QysdBWD6Abjv-Jb0hK0bHd4oyibfrNeSD45/exec";
+const BULAN_NAMA = ["","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+const HARI_NAMA  = ["Min","Sen","Sel","Rab","Kam","Jum","Sab"];
+
+const LAYANAN_RESMI = [
+  "layanan data dan pengaduan","penyediaan layanan kedaruratan","layanan reaksi cepat",
+  "penyediaan permakanan","penyediaan sandang","penyediaan perbekalan kesehatan","penyediaan p3k",
+  "pemberian bimbingan fisik","pemberian bimbingan mental","pemberian bimbingan spiritual",
+  "pemberian bimbingan sosial kepada keluarga","fasilitas pembuatan nomor induk kependudukan",
+  "kartu tanda penduduk","akta kelahiran","surat nikah","kartu identitas anak","bukti dokumen kependudukan",
+  "akses pelayanan pendidikan","akses pelayanan kesehatan dasar","fasilitasi layanan pendidikan",
+  "fasilitasi layanan kesehatan","pemberian pelayanan penelusuran keluarga","biometri",
+  "pemberian pelayanan reunifikasi keluarga","layanan rujukan",
+];
+function normalizeTindakLanjut(raw) {
+  if (!raw || !raw.trim()) return '–';
+  const lower = raw.toLowerCase();
+  return LAYANAN_RESMI.some(kw => lower.includes(kw)) ? toTitleCase(raw) : 'Lainnya';
+}
+
+const PPKS_CATEGORIES = [
+  {key:"anak balita terlantar",label:"Anak Balita Terlantar",color:"sc-amber",icon:"fa-baby"},
+  {key:"anak terlantar",label:"Anak Terlantar",color:"sc-sky",icon:"fa-child"},
+  {key:"anak yang berhadapan dengan hukum",label:"ABH",color:"sc-rose",icon:"fa-gavel"},
+  {key:"anak jalanan",label:"Anak Jalanan",color:"sc-emerald",icon:"fa-road"},
+  {key:"anak dengan kedisabilitasan",label:"ADK",color:"sc-violet",icon:"fa-wheelchair"},
+  {key:"anak yang menjadi korban tindak kekerasan",label:"Korban Kekerasan Anak",color:"sc-rose",icon:"fa-shield-halved"},
+  {key:"anak yang memerlukan perlindungan khusus",label:"Perlindungan Khusus",color:"sc-cyan",icon:"fa-umbrella"},
+  {key:"lanjut usia",label:"Lansia Terlantar",color:"sc-amber",icon:"fa-person-cane"},
+  {key:"penyandang disabilitas",label:"Penyandang Disabilitas",color:"sc-indigo",icon:"fa-wheelchair-move"},
+  {key:"tuna susila",label:"Tuna Susila",color:"sc-pink",icon:"fa-circle-user"},
+  {key:"gelandangan",label:"Gelandangan",color:"sc-teal",icon:"fa-person-walking"},
+  {key:"pengemis",label:"Pengemis",color:"sc-orange",icon:"fa-hand-holding-heart"},
+  {key:"pemulung",label:"Pemulung",color:"sc-lime",icon:"fa-recycle"},
+  {key:"kelompok minoritas",label:"Kelompok Minoritas",color:"sc-violet",icon:"fa-people-group"},
+  {key:"bekas warga binaan",label:"BWBLP",color:"sc-rose",icon:"fa-building-columns"},
+  {key:"orang dengan hiv",label:"ODHA",color:"sc-orange",icon:"fa-virus"},
+  {key:"korban penyalahgunaan napza",label:"Korban NAPZA",color:"sc-violet",icon:"fa-pills"},
+  {key:"korban trafficking",label:"Korban Trafficking",color:"sc-rose",icon:"fa-link-slash"},
+  {key:"korban tindak kekerasan",label:"Korban Kekerasan",color:"sc-rose",icon:"fa-triangle-exclamation"},
+  {key:"pekerja migran",label:"PMBS",color:"sc-sky",icon:"fa-plane-departure"},
+  {key:"korban bencana alam",label:"Korban Bencana Alam",color:"sc-orange",icon:"fa-house-flood-water"},
+  {key:"korban bencana sosial",label:"Korban Bencana Sosial",color:"sc-amber",icon:"fa-people-arrows"},
+  {key:"perempuan rawan sosial",label:"Perempuan Rawan Sosial",color:"sc-pink",icon:"fa-venus"},
+  {key:"fakir miskin",label:"Fakir Miskin",color:"sc-emerald",icon:"fa-hand-holding-dollar"},
+  {key:"keluarga bermasalah sosial",label:"Keluarga Masalah Sosial",color:"sc-cyan",icon:"fa-house-crack"},
+  {key:"komunitas adat terpencil",label:"Komunitas Adat Terpencil",color:"sc-lime",icon:"fa-campground"},
+  {key:"orang terlantar",label:"Orang Terlantar",color:"sc-sky",icon:"fa-person"},
+];
+
+const CHART_COLORS = ['#4f46e5','#0ea5e9','#059669','#d97706','#e11d48','#7c3aed','#0d9488','#ea580c','#db2777','#65a30d','#0891b2','#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#f97316','#ec4899','#84cc16','#06b6d4','#a78bfa','#34d399','#fbbf24','#f87171','#c084fc','#2dd4bf','#fb923c'];
+
+// Koordinat per kecamatan Kota Batu (untuk peta)
+const KEC_COORDS = {
+  "batu":    [-7.8683,112.5263],
+  "bumiaji": [-7.8108,112.5085],
+  "junrejo": [-7.9068,112.5482],
+};
+
+// Warna per jenis PPKS untuk peta
+const PPKS_COLORS = ['#4f46e5','#e11d48','#059669','#d97706','#7c3aed','#0ea5e9','#0d9488','#db2777','#ea580c','#65a30d','#0891b2','#6366f1','#ef4444','#8b5cf6','#f97316','#ec4899','#f59e0b','#34d399','#a78bfa','#fbbf24'];
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let allData = [], filtered = [], sortCol = "TANGGAL", sortDir = "desc", curPage = 1;
+const PER_PAGE = 20;
+let chartDonut=null, chartGender=null, chartTime=null, chartLayanan=null, chartKec=null;
+let leafletMap=null, markerLayer=null;
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+
+/* ══════════════════════════════════════════
+   DARK MODE
+══════════════════════════════════════════ */
+function toggleDark() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('darkIcon').className = isDark ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+  localStorage.setItem('ppks-theme', isDark ? 'light' : 'dark');
+  if (chartDonut) renderStatistik(); // refresh charts colors
+}
+(function initTheme() {
+  const saved = localStorage.getItem('ppks-theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme','dark');
+    document.getElementById('darkIcon').className = 'fa-solid fa-sun';
+  }
+})();
+
+/* ══════════════════════════════════════════
+   PAGE NAVIGATION
+══════════════════════════════════════════ */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item[id]').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const nav = document.getElementById('nav-'+name);
+  if (nav) nav.classList.add('active');
+  if (name === 'statistik' && allData.length) renderStatistik();
+  if (name === 'peta' && allData.length) initPeta();
+  if (name === 'kalender' && allData.length) renderKalender();
+}
+
+/* ══════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════ */
+function toTitleCase(str) {
+  if (!str) return '';
+  return String(str).toLowerCase().replace(/(?:^|\s|\/|-)\S/g, c => c.toUpperCase());
+}
+
+const BULAN_ID = {'januari':0,'februari':1,'maret':2,'april':3,'mei':4,'juni':5,'juli':6,'agustus':7,'september':8,'oktober':9,'november':10,'desember':11};
+function parseDate(raw) {
+  if (!raw) return null;
+  const s = String(raw).trim();
+  const mID = s.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
+  if (mID) { const mon = BULAN_ID[mID[2].toLowerCase()]; if (mon!==undefined) return new Date(+mID[3],mon,+mID[1]); }
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s);
+  const mDMY = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (mDMY) { let y=+mDMY[3]; if(y<100)y+=2000; return new Date(y,+mDMY[2]-1,+mDMY[1]); }
+  if (!isNaN(raw) && +raw>1000) return new Date((+raw-25569)*86400000);
+  const d = new Date(s); return isNaN(d) ? null : d;
+}
+function fmtDate(raw) {
+  const d = parseDate(raw); if(!d) return raw||'';
+  return d.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function isNew(raw) {
+  const d = parseDate(raw); if(!d) return false;
+  return (Date.now()-d.getTime()) < 7*24*60*60*1000;
+}
+function getBadgeClass(jenis) {
+  if (!jenis) return 'b-def';
+  const j = jenis.toLowerCase();
+  for (let i=0; i<PPKS_CATEGORIES.length; i++) if (j.includes(PPKS_CATEGORIES[i].key)) return `b-${i}`;
+  return 'b-def';
+}
+
+/* ══════════════════════════════════════════
+   FORMULA PEMETAAN 5 ATURAN UTAMA
+   Sumber kolom spreadsheet → field HTML
+══════════════════════════════════════════
+
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │ ATURAN 1 — Kec. Temuan                                              │
+  │   Kolom C: "Kecamatan ditemukannya PPKS"                           │
+  │   Jika kosong → tampil '–'                                          │
+  │                                                                     │
+  │ ATURAN 2 — Kota / Kabupaten                                         │
+  │   Kolom J: "Kota / Kabupaten"                                       │
+  │   Jika J kosong ATAU J = "Luar Batu"                                │
+  │     → ambil Kolom Y: "Kota/Kabupaten Luar Batu"                     │
+  │                                                                     │
+  │   Skenario:                                                         │
+  │     Warga Batu    → J="Batu"        → Kota = Batu                  │
+  │     Luar Batu baru→ J="Luar Batu"   → Kota = Kolom Y (mis. Bogor)  │
+  │     Luar Batu lama→ J="Bogor"       → Kota = Bogor (langsung)      │
+  │                                                                     │
+  │ ATURAN 3 — Kecamatan (domisili PPKS)                                │
+  │   Kolom I: "Kecamatan"                                              │
+  │   Jika Kolom J = "Luar Batu"                                        │
+  │     → ambil Kolom X: "Kecamatan Luar Batu"                          │
+  │                                                                     │
+  │   Skenario:                                                         │
+  │     Warga Batu    → I="Bumiaji"     → Kec = Bumiaji                │
+  │     Luar Batu baru→ J="Luar Batu"   → Kec = Kolom X (Tajurhalang) │
+  │     Luar Batu lama→ I="Tajurhalang" → Kec = Tajurhalang            │
+  │                                                                     │
+  │ ATURAN 4 — Desa / Kelurahan                                         │
+  │   Kolom H: "Desa/Kelurahan"                                         │
+  │                                                                     │
+  │ ATURAN 5 — Alamat                                                   │
+  │   Kolom F: "Alamat PPKS"                                            │
+  └─────────────────────────────────────────────────────────────────────┘
+
+  Semua aturan di atas sudah dihitung oleh Apps Script sebelum data
+  dikirim ke HTML. HTML tinggal memakai field hasil pemetaan:
+    KECAMATAN_TEMUAN ← Aturan 1 (kolom C)
+    KOTA             ← Aturan 2 (kolom J → fallback Y)
+    KECAMATAN        ← Aturan 3 (kolom I → fallback X jika J="Luar Batu")
+    DESA             ← Aturan 4 (kolom H)
+    ALAMAT           ← Aturan 5 (kolom F)
+*/
+
+/**
+ * Terapkan 5 aturan pemetaan field + normalisasi teks.
+ * Jika suatu hari Apps Script berubah dan mengirim field mentah,
+ * cukup tambahkan logika fallback di sini.
+ * @param {Object} d  — objek satu baris dari API
+ */
+function mapPPKSFields(d) {
+  // ── Aturan 1: Kec. Temuan ─────────────────────────────────────────
+  // Kolom C ("Kecamatan ditemukannya PPKS") → KECAMATAN_TEMUAN
+  // Kosong ditangani saat render: item.KECAMATAN_TEMUAN||'–'
+  const kecTemuan = toTitleCase((d.KECAMATAN_TEMUAN || '').trim());
+
+  // ── Aturan 2: Kota / Kabupaten ────────────────────────────────────
+  // Kolom J ("Kota / Kabupaten") → KOTA
+  // Jika J kosong atau "Luar Batu" → Apps Script sudah pakai kolom Y
+  const kota = toTitleCase((d.KOTA || '').trim());
+
+  // ── Aturan 3: Kecamatan ───────────────────────────────────────────
+  // Kolom I ("Kecamatan") → KECAMATAN
+  // Jika J = "Luar Batu" → Apps Script sudah pakai kolom X
+  const kecamatan = toTitleCase((d.KECAMATAN || '').trim());
+
+  // ── Aturan 4: Desa / Kelurahan ────────────────────────────────────
+  // Kolom H ("Desa/Kelurahan") → DESA
+  const desa = toTitleCase((d.DESA || '').trim());
+
+  // ── Aturan 5: Alamat ──────────────────────────────────────────────
+  // Kolom F ("Alamat PPKS") → ALAMAT
+  const alamat = toTitleCase((d.ALAMAT || '').trim());
+
+  return {
+    ...d,
+    KECAMATAN_TEMUAN:   kecTemuan,
+    KOTA:               kota,
+    KECAMATAN:          kecamatan,
+    DESA:               desa,
+    ALAMAT:             alamat,
+    TINDAK_LANJUT:      toTitleCase(d.TINDAK_LANJUT),
+    TINDAK_LANJUT_STAT: normalizeTindakLanjut(d.TINDAK_LANJUT),
+  };
+}
+
+/* ══════════════════════════════════════════
+   LOAD DATA
+══════════════════════════════════════════ */
+async function loadData() {
+  try {
+    const res  = await fetch(API_URL);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    allData = data.map(mapPPKSFields);
+    filtered = [...allData];
+    document.getElementById('lastUpdate').textContent =
+      new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+    // badge "baru" di sidebar
+    const newCount = allData.filter(d => isNew(d.TANGGAL)).length;
+    if (newCount > 0) {
+      const nav = document.getElementById('nav-database');
+      nav.innerHTML += `<span class="nav-badge">${newCount}</span>`;
+    }
+
+    buildDropdowns();
+    renderStats(filtered);
+    sortAndRender();
+  } catch(err) {
+    document.getElementById('tbody').innerHTML =
+      `<tr><td colspan="12" style="text-align:center;padding:60px;color:#dc2626;">
+        <i class="fa-solid fa-circle-exclamation" style="font-size:24px;display:block;margin-bottom:8px;"></i>
+        Gagal memuat data.<br><small style="color:var(--muted2)">${err.message}</small>
+      </td></tr>`;
+  }
+}
+
+/* ══════════════════════════════════════════
+   DROPDOWNS
+══════════════════════════════════════════ */
+function buildDropdowns() {
+  fillSelect('fJenis', [...new Set(allData.map(d=>d.JENIS_PPKS).filter(Boolean))].sort(), '– Semua Jenis –');
+  fillSelect('fKecamatan', [...new Set(allData.map(d=>d.KECAMATAN_TEMUAN).filter(Boolean))].sort(), '– Semua –');
+  fillSelect('fKota', [...new Set(allData.map(d=>d.KOTA).filter(Boolean))].sort(), '– Semua Kota –');
+  fillSelect('mapFJenis', [...new Set(allData.map(d=>d.JENIS_PPKS).filter(Boolean))].sort(), '– Semua –');
+  fillSelect('mapFKec', [...new Set(allData.map(d=>d.KECAMATAN_TEMUAN).filter(Boolean))].sort(), '– Semua –');
+  populateKecOptions(''); populateDesaOptions('','');
+  buildYearOptions();
+}
+function fillSelect(id, items, placeholder) {
+  const sel = document.getElementById(id);
+  sel.innerHTML = `<option value="">${placeholder}</option>`;
+  items.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
+}
+function populateKecOptions(kota) {
+  const subset = kota ? allData.filter(d=>d.KOTA===kota) : allData;
+  fillSelect('fKec', [...new Set(subset.map(d=>d.KECAMATAN).filter(Boolean))].sort(), '– Semua –');
+}
+function populateDesaOptions(kota,kec) {
+  let sub = allData;
+  if (kota) sub = sub.filter(d=>d.KOTA===kota);
+  if (kec)  sub = sub.filter(d=>d.KECAMATAN===kec);
+  fillSelect('fDesa', [...new Set(sub.map(d=>d.DESA).filter(Boolean))].sort(), '– Semua –');
+}
+function onKotaChange() { const k=document.getElementById('fKota').value; populateKecOptions(k); populateDesaOptions(k,''); applyFilter(); }
+function onKecChange()  { const k=document.getElementById('fKota').value; const kec=document.getElementById('fKec').value; populateDesaOptions(k,kec); applyFilter(); }
+
+function buildYearOptions() {
+  const now = new Date();
+  const years = [...new Set(allData.map(d=>{const p=parseDate(d.TANGGAL);return p?p.getFullYear():null;}).filter(Boolean))];
+  years.push(now.getFullYear());
+  const uniq = [...new Set(years)].sort((a,b)=>b-a);
+  ['expTahun','expTahunDari','expTahunSampai'].forEach(id => {
+    const sel=document.getElementById(id); sel.innerHTML='';
+    uniq.forEach(y=>{ const o=document.createElement('option'); o.value=y; o.textContent=y; if(y===now.getFullYear())o.selected=true; sel.appendChild(o); });
+  });
+  BULAN_NAMA.slice(1).forEach((n,i) => {
+    ['expBulan','expBulanDari','expBulanSampai'].forEach(id => {
+      const sel=document.getElementById(id);
+      const o=document.createElement('option'); o.value=i+1; o.textContent=n; if(i+1===now.getMonth()+1)o.selected=true; sel.appendChild(o);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════
+   FILTER
+══════════════════════════════════════════ */
+function applyFilter() {
+  const search = document.getElementById('fSearch').value.toLowerCase().trim();
+  const jenis  = document.getElementById('fJenis').value.trim();
+  const kec    = document.getElementById('fKecamatan').value.trim();
+  const jk     = document.getElementById('fJK').value.trim();
+  const fKota  = document.getElementById('fKota').value.trim();
+  const fKec   = document.getElementById('fKec').value.trim();
+  const fDesa  = document.getElementById('fDesa').value.trim();
+  // Parse YYYY-MM-DD dari input sebagai LOKAL bukan UTC
+  function pLok(s){if(!s)return null;const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+  const mulai = pLok(document.getElementById('fTglMulai').value);
+  const akhir = pLok(document.getElementById('fTglAkhir').value);
+  filtered = allData.filter(item => {
+    if (search && !((item.NAMA||'').toLowerCase().includes(search)||String(item.NIK||'').includes(search))) return false;
+    if (jenis  && (item.JENIS_PPKS||'')!==jenis) return false;
+    if (kec    && (item.KECAMATAN_TEMUAN||'')!==kec) return false;
+    if (jk     && (item.JENIS_KELAMIN||'')!==jk) return false;
+    if (fKota  && (item.KOTA||'')!==fKota) return false;
+    if (fKec   && (item.KECAMATAN||'')!==fKec) return false;
+    if (fDesa  && (item.DESA||'')!==fDesa) return false;
+    if (mulai||akhir) {
+      const d=parseDate(item.TANGGAL); if(!d) return false;
+      const dH=new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();
+      if (mulai && dH < new Date(mulai.getFullYear(),mulai.getMonth(),mulai.getDate()).getTime()) return false;
+      if (akhir && dH > new Date(akhir.getFullYear(),akhir.getMonth(),akhir.getDate()).getTime()) return false;
+    }
+    return true;
+  });
+  curPage=1; renderStats(filtered); sortAndRender();
+}
+function resetFilter() {
+  ['fSearch','fTglMulai','fTglAkhir'].forEach(id=>document.getElementById(id).value='');
+  ['fJenis','fKecamatan','fJK','fKota','fKec','fDesa'].forEach(id=>document.getElementById(id).value='');
+  populateKecOptions(''); populateDesaOptions('','');
+  filtered=[...allData]; curPage=1; renderStats(filtered); sortAndRender();
+}
+document.getElementById('fSearch').addEventListener('input', applyFilter);
+
+/* ══════════════════════════════════════════
+   STATS (database page)
+══════════════════════════════════════════ */
+function renderStats(data) {
+  document.getElementById('st-total').textContent = data.length;
+  document.getElementById('st-unik').textContent  = new Set(data.map(d=>d.NIK||d.NAMA)).size;
+  document.getElementById('categoryStats').innerHTML = PPKS_CATEGORIES.map((cat,i) => {
+    const count = data.filter(d=>(d.JENIS_PPKS||'').toLowerCase().includes(cat.key)).length;
+    return `<div class="stat-card ${cat.color}"><div class="sc-icon"><i class="fa-solid ${cat.icon}"></i></div><div class="sc-val">${count}</div><div class="sc-label">${cat.label}</div></div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════
+   SORT & TABLE
+══════════════════════════════════════════ */
+function onSortChange()  { sortCol=document.getElementById('sortColSel').value; curPage=1; updateSortLabel(); sortAndRender(); }
+function toggleSortDir() {
+  sortDir = sortDir==='asc' ? 'desc' : 'asc';
+  document.getElementById('sortDirIcon').className = sortDir==='asc' ? 'fa-solid fa-arrow-up-short-wide' : 'fa-solid fa-arrow-down-short-wide';
+  updateSortLabel(); curPage=1; sortAndRender();
+}
+function updateSortLabel() {
+  const L = {TANGGAL:['Terlama→Terbaru','Terbaru→Terlama'],NAMA:['A→Z','Z→A'],NIK:['Kecil→Besar','Besar→Kecil'],JENIS_PPKS:['A→Z','Z→A'],KECAMATAN_TEMUAN:['A→Z','Z→A'],KOTA:['A→Z','Z→A'],KECAMATAN:['A→Z','Z→A'],TINDAK_LANJUT:['A→Z','Z→A']};
+  const p = L[sortCol]||['Naik','Turun'];
+  document.getElementById('sortLabel').textContent = sortDir==='asc' ? p[0] : p[1];
+}
+function sortAndRender() {
+  const dir = sortDir==='asc' ? 1 : -1;
+  filtered.sort((a,b) => {
+    if (sortCol==='TANGGAL') { const da=parseDate(a.TANGGAL),db=parseDate(b.TANGGAL); if(da&&db) return (da-db)*dir; }
+    return String(a[sortCol]||'').localeCompare(String(b[sortCol]||''),'id')*dir;
+  });
+  renderTable();
+}
+updateSortLabel();
+
+function renderTable() {
+  const showNew = document.getElementById('chkShowNew').checked;
+  const total=filtered.length, pages=Math.max(1,Math.ceil(total/PER_PAGE));
+  curPage=Math.min(curPage,pages);
+  const start=(curPage-1)*PER_PAGE, slice=filtered.slice(start,start+PER_PAGE);
+  document.getElementById('paginationInfo').textContent = total ? `Menampilkan ${start+1}–${Math.min(start+PER_PAGE,total)} dari ${total} data` : '';
+  document.getElementById('recordInfo').textContent = total ? `${total} data ditemukan` : '';
+  const tbody=document.getElementById('tbody');
+  if (!slice.length) {
+    tbody.innerHTML='<tr class="empty-row"><td colspan="12"><i class="fa-solid fa-database" style="font-size:28px;display:block;margin-bottom:8px;opacity:.2;"></i>Tidak ada data.</td></tr>';
+    document.getElementById('paginationBtns').innerHTML=''; return;
+  }
+  tbody.innerHTML = slice.map((item,i) => {
+    const jenis=item.JENIS_PPKS||'';
+    const jkIcon = item.JENIS_KELAMIN==='Perempuan' ? '<i class="fa-solid fa-venus" style="color:#db2777;font-size:12px;"></i>'
+      : item.JENIS_KELAMIN==='Laki-laki' ? '<i class="fa-solid fa-mars" style="color:#2563eb;font-size:12px;"></i>' : '';
+    const newRow = showNew && isNew(item.TANGGAL) ? ' row-new' : '';
+    return `<tr class="${newRow}" onclick="openProfil('${(item.NIK||item.NAMA||'').replace(/'/g,"\\'")}', '${item.NAMA.replace(/'/g,"\\'")}')">
+      <td style="color:var(--muted2);font-size:11.5px;">${start+i+1}</td>
+      <td style="white-space:nowrap;font-size:12px;">${fmtDate(item.TANGGAL)}</td>
+      <td style="font-family:monospace;font-size:10.5px;color:var(--muted);">${item.NIK||'–'}</td>
+      <td style="font-weight:600;font-size:13px;cursor:pointer;color:var(--indigo);">${item.NAMA||''}</td>
+      <td style="text-align:center;">${jkIcon}</td>
+      <td><span class="tag">${item.KECAMATAN_TEMUAN||'–'}</span></td>
+      <td style="font-size:12px;">${item.KOTA||'–'}</td>
+      <td style="font-size:12px;">${item.KECAMATAN||'–'}</td>
+      <td style="font-size:12px;">${item.DESA||'–'}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;" title="${item.ALAMAT||''}">${item.ALAMAT||'–'}</td>
+      <td><span class="badge ${getBadgeClass(jenis)}">${jenis||'–'}</span></td>
+      <td class="td-tl">${item.TINDAK_LANJUT||'–'}</td>
+    </tr>`;
+  }).join('');
+  renderPagination(pages);
+}
+
+function renderPagination(pages) {
+  const bar=document.getElementById('paginationBtns');
+  if (pages<=1) { bar.innerHTML=''; return; }
+  const range=[];
+  for(let i=1;i<=pages;i++) {
+    if(i===1||i===pages||Math.abs(i-curPage)<=2) range.push(i);
+    else if(range[range.length-1]!=='…') range.push('…');
+  }
+  bar.innerHTML=`<button class="pg-btn" onclick="gotoPage(${curPage-1})" ${curPage===1?'disabled':''}>‹</button>`+
+    range.map(p=>p==='…'?`<span class="pg-btn" style="cursor:default;border:none">…</span>`:`<button class="pg-btn ${p===curPage?'active':''}" onclick="gotoPage(${p})">${p}</button>`).join('')+
+    `<button class="pg-btn" onclick="gotoPage(${curPage+1})" ${curPage===pages?'disabled':''}>›</button>`;
+}
+function gotoPage(p) { curPage=p; renderTable(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+/* ══════════════════════════════════════════
+   PROFIL MODAL
+══════════════════════════════════════════ */
+function openProfil(key, nama) {
+  // Semua entri dengan NIK atau NAMA yang sama
+  const riwayat = allData.filter(d => (d.NIK && d.NIK===key) || d.NAMA===nama).sort((a,b) => {
+    const da=parseDate(a.TANGGAL),db=parseDate(b.TANGGAL);
+    if(da&&db) return db-da; return 0;
+  });
+  if (!riwayat.length) return;
+  const first = riwayat[0];
+  document.getElementById('profilNama').textContent = first.NAMA;
+  document.getElementById('profilGrid').innerHTML = [
+    {label:'NIK',val:first.NIK||'–'},{label:'Jenis Kelamin',val:first.JENIS_KELAMIN||'–'},
+    {label:'Kota / Kab',val:first.KOTA||'–'},{label:'Kecamatan',val:first.KECAMATAN||'–'},
+    {label:'Desa',val:first.DESA||'–'},{label:'RT/RW',val:first.RTRW||'–'},
+    {label:'Alamat Lengkap',val:first.ALAMAT||'–',full:true},
+    {label:'Jenis PPKS',val:first.JENIS_PPKS||'–',full:true},
+  ].map(kv=>`<div class="profil-kv ${kv.full?'full':''}"><div class="pk-label">${kv.label}</div><div class="pk-val">${kv.val}</div></div>`).join('');
+  document.getElementById('riwayatList').innerHTML = riwayat.map(r =>
+    `<div class="riwayat-item">
+      <div class="riwayat-date">${fmtDate(r.TANGGAL)}</div>
+      <div class="riwayat-body">
+        <div class="rj"><span class="badge ${getBadgeClass(r.JENIS_PPKS||'')}">${r.JENIS_PPKS||'–'}</span></div>
+        <div class="rl"><i class="fa-solid fa-location-dot" style="color:var(--indigo);margin-right:4px;"></i>${r.KECAMATAN_TEMUAN||'–'}</div>
+        <div class="rl" style="margin-top:2px;"><i class="fa-solid fa-hand-holding-heart" style="color:var(--emerald);margin-right:4px;"></i>${r.TINDAK_LANJUT||'–'}</div>
+      </div>
+    </div>`
+  ).join('');
+  document.getElementById('profilModal').classList.add('open');
+}
+function closeProfilModal() { document.getElementById('profilModal').classList.remove('open'); }
+document.getElementById('profilModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeProfilModal(); });
+
+/* ══════════════════════════════════════════
+   EXPORT EXCEL (.xlsx)
+══════════════════════════════════════════ */
+function exportExcel() {
+  const rows = [
+    ['No','Tanggal','NIK','Nama','JK','Kec. Temuan','Kota/Kab','Kecamatan','Desa','RT/RW','Alamat','Jenis PPKS','Tindak Lanjut'],
+    ...filtered.map((d,i) => [i+1, fmtDate(d.TANGGAL), d.NIK, d.NAMA, d.JENIS_KELAMIN, d.KECAMATAN_TEMUAN, d.KOTA, d.KECAMATAN, d.DESA, d.RTRW, d.ALAMAT, d.JENIS_PPKS, d.TINDAK_LANJUT])
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [4,10,17,22,6,14,14,14,12,8,20,22,30].map(w=>({wch:w}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Data PPKS');
+  XLSX.writeFile(wb, `Data_PPKS_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+/* ══════════════════════════════════════════
+   STATISTIK CHARTS
+══════════════════════════════════════════ */
+function destroyChart(c) { if(c) c.destroy(); return null; }
+const fontFam = "'Source Sans 3', sans-serif";
+
+function renderStatistik() {
+  const data = allData;
+  const kec  = new Set(data.map(d=>d.KECAMATAN_TEMUAN).filter(Boolean)).size;
+  const laki = data.filter(d=>(d.JENIS_KELAMIN||'').toLowerCase().includes('laki')).length;
+  const perempuan = data.filter(d=>(d.JENIS_KELAMIN||'').toLowerCase().includes('perempuan')).length;
+  document.getElementById('statKvGrid').innerHTML = [
+    {val:data.length,label:'Total Entri'},{val:new Set(data.map(d=>d.NIK||d.NAMA)).size,label:'Individu Unik'},
+    {val:kec,label:'Kecamatan Temuan'},{val:laki,label:'Laki-laki'},
+    {val:perempuan,label:'Perempuan'},{val:allData.filter(d=>isNew(d.TANGGAL)).length,label:'Baru (7 hari)'},
+  ].map(kv=>`<div class="stat-kv"><div class="kv-val">${kv.val}</div><div class="kv-label">${kv.label}</div></div>`).join('');
+
+  // Donut
+  chartDonut = destroyChart(chartDonut);
+  const ppksCounts={};
+  data.forEach(d=>{ const k=d.JENIS_PPKS||'Tidak Diketahui'; ppksCounts[k]=(ppksCounts[k]||0)+1; });
+  const ppksE = Object.entries(ppksCounts).sort((a,b)=>b[1]-a[1]).slice(0,14);
+  chartDonut = new Chart(document.getElementById('chartDonut'),{
+    type:'doughnut',
+    data:{labels:ppksE.map(e=>e[0]),datasets:[{data:ppksE.map(e=>e[1]),backgroundColor:CHART_COLORS,borderWidth:2,borderColor:'transparent'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{family:fontFam,size:10.5},boxWidth:11,padding:8}},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed} (${((ctx.parsed/data.length)*100).toFixed(1)}%)`}}}}
+  });
+
+  // Gender stacked
+  chartGender = destroyChart(chartGender);
+  const topPpks = Object.entries(ppksCounts).sort((a,b)=>b[1]-a[1]).slice(0,10).map(e=>e[0]);
+  chartGender = new Chart(document.getElementById('chartGender'),{
+    type:'bar',
+    data:{labels:topPpks.map(l=>l.length>20?l.slice(0,20)+'…':l),datasets:[
+      {label:'Laki-laki',data:topPpks.map(p=>data.filter(d=>d.JENIS_PPKS===p&&(d.JENIS_KELAMIN||'').toLowerCase().includes('laki')).length),backgroundColor:'#3b82f6',borderRadius:3},
+      {label:'Perempuan',data:topPpks.map(p=>data.filter(d=>d.JENIS_PPKS===p&&(d.JENIS_KELAMIN||'').toLowerCase().includes('perempuan')).length),backgroundColor:'#ec4899',borderRadius:3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{family:fontFam,size:10.5},boxWidth:11}}},scales:{x:{stacked:true,ticks:{font:{family:fontFam,size:9.5}}},y:{stacked:true,ticks:{font:{family:fontFam,size:10.5}}}}}
+  });
+
+  // Time series
+  chartTime = destroyChart(chartTime);
+  const monthMap={};
+  data.forEach(d=>{ const dt=parseDate(d.TANGGAL); if(!dt) return; const k=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`; monthMap[k]=(monthMap[k]||0)+1; });
+  const timeE = Object.entries(monthMap).sort((a,b)=>a[0].localeCompare(b[0]));
+  chartTime = new Chart(document.getElementById('chartTime'),{
+    type:'line',
+    data:{labels:timeE.map(([k])=>{ const [y,m]=k.split('-'); return `${BULAN_NAMA[+m]} ${y}`; }),datasets:[{label:'Entri',data:timeE.map(e=>e[1]),borderColor:'#4f46e5',backgroundColor:'rgba(79,70,229,.08)',borderWidth:2.5,pointRadius:3.5,pointBackgroundColor:'#4f46e5',fill:true,tension:.35}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{family:fontFam,size:9.5},maxRotation:45}},y:{ticks:{font:{family:fontFam,size:10.5}},beginAtZero:true}}}
+  });
+
+  // Layanan (pakai STAT)
+  chartLayanan = destroyChart(chartLayanan);
+  const layMap={};
+  data.forEach(d=>{ const k=d.TINDAK_LANJUT_STAT||'–'; layMap[k]=(layMap[k]||0)+1; });
+  const layE = Object.entries(layMap).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  chartLayanan = new Chart(document.getElementById('chartLayanan'),{
+    type:'bar',
+    data:{labels:layE.map(e=>e[0].length>34?e[0].slice(0,34)+'…':e[0]),datasets:[{label:'Jumlah',data:layE.map(e=>e[1]),backgroundColor:CHART_COLORS.slice(0,layE.length),borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{family:fontFam,size:10.5}}},y:{ticks:{font:{family:fontFam,size:10}}}}}
+  });
+
+  // Kecamatan
+  chartKec = destroyChart(chartKec);
+  const kecMap={};
+  data.forEach(d=>{ const k=d.KECAMATAN_TEMUAN||'Tidak Diketahui'; kecMap[k]=(kecMap[k]||0)+1; });
+  const kecE = Object.entries(kecMap).sort((a,b)=>b[1]-a[1]);
+  chartKec = new Chart(document.getElementById('chartKec'),{
+    type:'bar',
+    data:{labels:kecE.map(e=>e[0]),datasets:[{label:'Jumlah',data:kecE.map(e=>e[1]),backgroundColor:'#4f46e5',borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{family:fontFam,size:10.5}}},y:{ticks:{font:{family:fontFam,size:10.5}},beginAtZero:true}}}
+  });
+}
+
+/* ══════════════════════════════════════════
+   PETA PERSEBARAN
+══════════════════════════════════════════ */
+function initPeta() {
+  if (!leafletMap) {
+    leafletMap = L.map('mapContainer').setView([-7.8683,112.5263], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution:'© OpenStreetMap',maxZoom:18
+    }).addTo(leafletMap);
+    markerLayer = L.layerGroup().addTo(leafletMap);
+  }
+  renderPeta();
+}
+
+function resetMapFilter() {
+  document.getElementById('mapFJenis').value='';
+  document.getElementById('mapFKec').value='';
+  renderPeta();
+}
+
+function renderPeta() {
+  if (!leafletMap) return;
+  markerLayer.clearLayers();
+  const fj = document.getElementById('mapFJenis').value;
+  const fk = document.getElementById('mapFKec').value;
+
+  // Bangun index jenis → warna
+  const jenisSet = [...new Set(allData.map(d=>d.JENIS_PPKS).filter(Boolean))].sort();
+  const colorMap = {};
+  jenisSet.forEach((j,i) => { colorMap[j] = PPKS_COLORS[i % PPKS_COLORS.length]; });
+
+  let data = allData;
+  if (fj) data = data.filter(d=>d.JENIS_PPKS===fj);
+  if (fk) data = data.filter(d=>d.KECAMATAN_TEMUAN===fk);
+
+  // Cluster per kecamatan temuan
+  const kecGroups={};
+  data.forEach(d => {
+    const k=(d.KECAMATAN_TEMUAN||'').toLowerCase().trim();
+    if (!kecGroups[k]) kecGroups[k]=[];
+    kecGroups[k].push(d);
+  });
+
+  Object.entries(kecGroups).forEach(([kec, items]) => {
+    const base = KEC_COORDS[kec] || KEC_COORDS['batu'];
+    // Spread marker dalam radius kecil agar tidak tumpuk
+    items.forEach((item, idx) => {
+      const angle = (idx/items.length)*2*Math.PI;
+      const spread = Math.min(0.008, 0.003*Math.sqrt(items.length));
+      const lat = base[0] + spread*Math.sin(angle)*(0.5+Math.random()*0.5);
+      const lng = base[1] + spread*Math.cos(angle)*(0.5+Math.random()*0.5);
+      const color = colorMap[item.JENIS_PPKS] || '#4f46e5';
+      const circle = L.circleMarker([lat,lng], {
+        radius:7, fillColor:color, color:'#fff', weight:1.5, opacity:1, fillOpacity:.85
+      });
+      circle.bindPopup(`
+        <div style="font-family:'Source Sans 3',sans-serif;min-width:190px;">
+          <div style="font-weight:700;font-size:13px;margin-bottom:4px;">${item.NAMA}</div>
+          <div style="font-size:11px;color:#6b7280;margin-bottom:6px;">${fmtDate(item.TANGGAL)}</div>
+          <div style="font-size:12px;margin-bottom:3px;"><b>Jenis:</b> ${item.JENIS_PPKS||'–'}</div>
+          <div style="font-size:12px;margin-bottom:3px;"><b>Kec. Temuan:</b> ${item.KECAMATAN_TEMUAN||'–'}</div>
+          <div style="font-size:12px;margin-bottom:3px;"><b>Kota/Kab:</b> ${item.KOTA||'–'}</div>
+          <div style="font-size:12px;"><b>Layanan:</b> ${item.TINDAK_LANJUT||'–'}</div>
+        </div>
+      `);
+      markerLayer.addLayer(circle);
+    });
+  });
+
+  // Legend
+  const usedJenis = [...new Set(data.map(d=>d.JENIS_PPKS).filter(Boolean))];
+  document.getElementById('mapLegend').innerHTML = usedJenis.slice(0,16).map(j=>
+    `<div class="map-legend-item"><div class="map-legend-dot" style="background:${colorMap[j]||'#4f46e5'};"></div>${j}</div>`
+  ).join('');
+
+  // Refresh map layout
+  setTimeout(() => leafletMap.invalidateSize(), 100);
+}
+
+/* ══════════════════════════════════════════
+   KALENDER
+══════════════════════════════════════════ */
+function renderKalender() {
+  document.getElementById('calTitle').textContent = `${BULAN_NAMA[calMonth+1]} ${calYear}`;
+  const grid = document.getElementById('calGrid');
+  // Header hari
+  let html = HARI_NAMA.map(h=>`<div class="cal-header">${h}</div>`).join('');
+  const first = new Date(calYear, calMonth, 1).getDay();
+  const days  = new Date(calYear, calMonth+1, 0).getDate();
+  const today = new Date();
+
+  // Hitung data per tanggal
+  const dateCount={};
+  allData.forEach(d=>{
+    const dt=parseDate(d.TANGGAL); if(!dt) return;
+    if(dt.getFullYear()===calYear && dt.getMonth()===calMonth) {
+      const k=dt.getDate(); dateCount[k]=(dateCount[k]||0)+1;
+    }
+  });
+
+  // Isi hari dari bulan sebelumnya
+  const prevDays = new Date(calYear,calMonth,0).getDate();
+  for(let i=0;i<first;i++) html+=`<div class="cal-day other-month"><div class="cal-day-num">${prevDays-first+1+i}</div></div>`;
+
+  for(let d=1;d<=days;d++) {
+    const isToday = today.getFullYear()===calYear && today.getMonth()===calMonth && today.getDate()===d;
+    const cnt = dateCount[d]||0;
+    const hasData = cnt>0;
+    html+=`<div class="cal-day ${isToday?'today':''} ${hasData?'has-data':''}" onclick="calClick(${d})">
+      <div class="cal-day-num">${d}</div>
+      ${hasData?`<div class="cal-count">${cnt}</div><div class="cal-count-label">data</div>`:''}
+    </div>`;
+  }
+
+  // Sisa kotak
+  const total = first+days;
+  const rem = total%7===0 ? 0 : 7-(total%7);
+  for(let i=1;i<=rem;i++) html+=`<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
+
+  grid.innerHTML = html;
+}
+
+function calClick(day) {
+  // Hapus selected lama
+  document.querySelectorAll('.cal-day.selected').forEach(el=>el.classList.remove('selected'));
+  // Tandai yang diklik
+  const cells = document.querySelectorAll('.cal-day:not(.other-month)');
+  cells.forEach(el=>{ if(+el.querySelector('.cal-day-num').textContent===day) el.classList.add('selected'); });
+
+  const target = new Date(calYear, calMonth, day);
+  const items = allData.filter(d=>{
+    const dt=parseDate(d.TANGGAL); if(!dt) return false;
+    return dt.getFullYear()===target.getFullYear() && dt.getMonth()===target.getMonth() && dt.getDate()===target.getDate();
+  });
+  const info = document.getElementById('calInfo');
+  if (!items.length) { info.className='cal-selected-info'; return; }
+  info.className='cal-selected-info show';
+  info.innerHTML=`<strong>${items.length} data pada ${day} ${BULAN_NAMA[calMonth+1]} ${calYear}:</strong>
+    <ul style="margin:8px 0 0 16px;">
+      ${items.map(d=>`<li style="font-size:12.5px;margin-bottom:3px;">${d.NAMA} — <span style="color:var(--indigo)">${d.JENIS_PPKS||'–'}</span></li>`).join('')}
+    </ul>
+    <div style="margin-top:8px;">
+      <button class="btn btn-primary btn-sm" onclick="filterByDate(`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`)">
+        <i class="fa-solid fa-filter"></i> Tampilkan di tabel
+      </button>
+    </div>`;
+}
+
+function filterByDate(dateStr) {
+  document.getElementById('fTglMulai').value = dateStr;
+  document.getElementById('fTglAkhir').value = dateStr;
+  applyFilter();
+  showPage('database');
+}
+
+function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderKalender(); }
+function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderKalender(); }
+
+/* ══════════════════════════════════════════
+   EXPORT MODAL + REPORT
+══════════════════════════════════════════ */
+function openExportModal()  { document.getElementById('exportModal').classList.add('open'); }
+function closeExportModal() { document.getElementById('exportModal').classList.remove('open'); }
+document.getElementById('exportModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeExportModal();});
+document.getElementById('useRange').addEventListener('change',function(){
+  document.getElementById('singleMonthBlock').style.display=this.checked?'none':'';
+  document.getElementById('rangeMonthBlock').style.display=this.checked?'':'none';
+});
+
+function generateReport() {
+  const isRange=document.getElementById('useRange').checked;
+  let monthData=[],reportTitle='';
+  if (!isRange) {
+    const bulan=+document.getElementById('expBulan').value, tahun=+document.getElementById('expTahun').value;
+    monthData=allData.filter(d=>{ const dt=parseDate(d.TANGGAL); return dt&&dt.getMonth()+1===bulan&&dt.getFullYear()===tahun; });
+    reportTitle=`${BULAN_NAMA[bulan]} ${tahun}`;
+  } else {
+    const bD=+document.getElementById('expBulanDari').value,tD=+document.getElementById('expTahunDari').value;
+    const bS=+document.getElementById('expBulanSampai').value,tS=+document.getElementById('expTahunSampai').value;
+    const dMs=new Date(tD,bD-1,1).getTime(), sMs=new Date(tS,bS,0).getTime();
+    monthData=allData.filter(d=>{ const dt=parseDate(d.TANGGAL); if(!dt) return false; return dt.getTime()>=dMs&&dt.getTime()<=sMs; });
+    reportTitle=`${BULAN_NAMA[bD]} ${tD} – ${BULAN_NAMA[bS]} ${tS}`;
+  }
+  if (!monthData.length) { alert('Tidak ada data untuk periode yang dipilih.'); return; }
+  const FIXED_KEC=["Batu","Bumiaji","Junrejo"];
+  const isLainnya=kec=>!FIXED_KEC.some(k=>k.toLowerCase()===(kec||'').trim().toLowerCase());
+  function countBy(data,ind,kec) { return data.filter(d=>(d.TINDAK_LANJUT||'').trim()===ind&&(kec==='Lainnya'?isLainnya((d.KECAMATAN_TEMUAN||'').trim()):((d.KECAMATAN_TEMUAN||'').trim().toLowerCase()===kec.toLowerCase()))).length; }
+  function buildTable(ppksData,ppksLabel) {
+    const kecIG=[...new Set(ppksData.map(d=>(d.KECAMATAN_TEMUAN||'').trim()))];
+    const mainK=FIXED_KEC.filter(k=>kecIG.some(d=>d.toLowerCase()===k.toLowerCase()));
+    const hasL=kecIG.some(d=>isLainnya(d));
+    const allKec=hasL?[...mainK,'Lainnya']:mainK;
+    const inds=[...new Set(ppksData.map(d=>(d.TINDAK_LANJUT||'').trim()).filter(Boolean))].sort();
+    const rows=inds.map((ind,idx)=>{
+      const cells=allKec.map(kec=>`<td style="text-align:center;border:1px solid #ddd;padding:5px 8px;">${countBy(ppksData,ind,kec)}</td>`).join('');
+      return `<tr style="background:${idx%2===0?'#fff':'#f9fafb'}"><td style="border:1px solid #ddd;text-align:center;padding:5px 8px;color:#666;">${idx+1}</td><td style="border:1px solid #ddd;padding:5px 10px;">${ind}</td>${cells}<td style="text-align:center;border:1px solid #ddd;padding:5px 8px;font-weight:700;color:#1e40af;">${ppksData.filter(d=>(d.TINDAK_LANJUT||'').trim()===ind).length}</td></tr>`;
+    }).join('');
+    return `<div style="margin-bottom:22px;"><div style="background:#1e40af;color:#fff;padding:7px 13px;font-weight:700;font-size:11.5px;border-radius:5px 5px 0 0;">${ppksLabel.toUpperCase()}</div><table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="background:#3b82f6;color:#fff;text-align:center;"><th style="border:1px solid #ddd;padding:7px 5px;width:34px;">NO</th><th style="border:1px solid #ddd;padding:7px;text-align:left;">JENIS LAYANAN</th>${allKec.map(k=>`<th style="border:1px solid #ddd;padding:7px 5px;min-width:66px;">${k.toUpperCase()}</th>`).join('')}<th style="border:1px solid #ddd;padding:7px 5px;">TOTAL</th></tr></thead><tbody>${rows||`<tr><td colspan="${2+allKec.length+1}" style="text-align:center;padding:10px;border:1px solid #ddd;color:#aaa;">Tidak ada data</td></tr>`}</tbody></table></div>`;
+  }
+  function buildSummary(mData) {
+    const ppksList=[...new Set(mData.map(d=>(d.JENIS_PPKS||'').trim()).filter(Boolean))].sort();
+    const rows=ppksList.map((ppks,idx)=>{
+      const sub=mData.filter(d=>(d.JENIS_PPKS||'').trim()===ppks);
+      const cells=FIXED_KEC.map(kec=>`<td style="text-align:center;border:1px solid #ddd;padding:5px 8px;">${sub.filter(d=>(d.KECAMATAN_TEMUAN||'').trim().toLowerCase()===kec.toLowerCase()).length}</td>`).join('');
+      return `<tr style="background:${idx%2===0?'#fff':'#f9fafb'}"><td style="border:1px solid #ddd;text-align:center;padding:5px 8px;color:#666;">${idx+1}</td><td style="border:1px solid #ddd;padding:5px 10px;">${ppks}</td>${cells}<td style="text-align:center;border:1px solid #ddd;padding:5px 8px;">${sub.filter(d=>isLainnya((d.KECAMATAN_TEMUAN||'').trim())).length}</td><td style="text-align:center;border:1px solid #ddd;padding:5px 8px;font-weight:700;color:#1e40af;">${sub.length}</td></tr>`;
+    }).join('');
+    return `<div style="margin-bottom:22px;"><div style="background:#065f46;color:#fff;padding:7px 13px;font-weight:700;font-size:11.5px;border-radius:5px 5px 0 0;">REKAP KESELURUHAN PER JENIS PPKS</div><table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="background:#059669;color:#fff;text-align:center;"><th style="border:1px solid #ddd;padding:7px 5px;width:34px;">NO</th><th style="border:1px solid #ddd;padding:7px;text-align:left;">JENIS PPKS</th>${FIXED_KEC.map(k=>`<th style="border:1px solid #ddd;padding:7px 5px;">${k.toUpperCase()}</th>`).join('')}<th style="border:1px solid #ddd;padding:7px 5px;">LAINNYA</th><th style="border:1px solid #ddd;padding:7px 5px;">TOTAL</th></tr></thead><tbody>${rows}</tbody><tfoot><tr style="background:#f0fdf4;font-weight:700;"><td colspan="2" style="border:1px solid #ddd;padding:6px 10px;text-align:right;">TOTAL</td>${FIXED_KEC.map(kec=>`<td style="text-align:center;border:1px solid #ddd;padding:6px;">${mData.filter(d=>(d.KECAMATAN_TEMUAN||'').trim().toLowerCase()===kec.toLowerCase()).length}</td>`).join('')}<td style="text-align:center;border:1px solid #ddd;padding:6px;">${mData.filter(d=>isLainnya((d.KECAMATAN_TEMUAN||'').trim())).length}</td><td style="text-align:center;border:1px solid #ddd;padding:6px;color:#1e40af;">${mData.length}</td></tr></tfoot></table></div>`;
+  }
+  const ppksList=[...new Set(monthData.map(d=>(d.JENIS_PPKS||'').trim()).filter(Boolean))].sort();
+  const allTables=ppksList.map(p=>buildTable(monthData.filter(d=>(d.JENIS_PPKS||'').trim()===p),p)).join('');
+  const printHTML=`<!DOCTYPE html><html><head><title>Laporan PPKS – ${reportTitle}</title><style>body{font-family:Arial,sans-serif;margin:0;padding:20px 26px;font-size:11px;}@media print{@page{margin:1cm;}}</style></head><body>
+    <div style="text-align:center;margin-bottom:22px;border-bottom:2px solid #1e40af;padding-bottom:14px;">
+      <div style="font-size:14px;font-weight:700;text-transform:uppercase;color:#1e3a8a;">LAPORAN PELAYANAN TRC DINAS SOSIAL KOTA BATU</div>
+      <div style="font-size:12.5px;font-weight:600;margin-top:4px;color:#374151;">Periode: ${reportTitle}</div>
+    </div>
+    ${buildSummary(monthData)}
+    <div style="margin:24px 0 16px;font-weight:700;font-size:11.5px;color:#374151;border-bottom:1px solid #e5e7eb;padding-bottom:7px;">RINCIAN PER JENIS PPKS</div>
+    ${allTables}
+    <div style="margin-top:36px;display:flex;justify-content:space-between;font-size:11px;">
+      <div><p style="color:#6b7280;">Dicetak: ${new Date().toLocaleString('id-ID')}</p></div>
+      <div style="text-align:right;"><p>Batu, ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}</p><p style="margin-top:8px;">Kepala Bidang Rehabilitasi Sosial</p><div style="height:58px;"></div><p style="border-top:1px solid #374151;display:inline-block;padding:0 22px;font-weight:700;">( )</p></div>
+    </div>
+  </body><script>window.onload=function(){window.print();}<\/script></html>`;
+  closeExportModal();
+  const w=window.open('','_blank','width=1100,height=750');
+  w.document.write(printHTML); w.document.close();
+}
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+loadData();
+</script>
+</body>
+</html>
