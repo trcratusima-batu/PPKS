@@ -56,6 +56,69 @@
 html{scroll-behavior:smooth;}
 body{font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh;transition:background .2s,color .2s;}
 
+/* ══════════════════════════════════════
+   LOGIN OVERLAY
+══════════════════════════════════════ */
+#loginOverlay {
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#1e1b5e 0%,#3730a3 50%,#4f46e5 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Source Sans 3',sans-serif;
+}
+#loginOverlay.hidden{display:none;}
+.login-box {
+  background:rgba(255,255,255,.08);backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.18);border-radius:20px;
+  padding:40px 36px;width:360px;max-width:95vw;
+  box-shadow:0 24px 64px rgba(0,0,0,.4);
+  animation:fadeInUp .35s ease;
+}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
+.login-logo{text-align:center;margin-bottom:28px;}
+.login-logo img{width:58px;height:58px;border-radius:14px;object-fit:cover;
+  box-shadow:0 4px 16px rgba(0,0,0,.3);margin-bottom:12px;display:block;margin-inline:auto;}
+.login-logo h2{color:#fff;font-family:'DM Serif Display',serif;font-size:20px;line-height:1.3;margin-bottom:2px;}
+.login-logo p{color:rgba(255,255,255,.5);font-size:12px;}
+.login-field{margin-bottom:14px;}
+.login-field label{display:block;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.7);
+  letter-spacing:.3px;margin-bottom:6px;}
+.login-field .input-wrap{position:relative;}
+.login-field input{
+  width:100%;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);
+  border-radius:10px;padding:10px 14px 10px 40px;color:#fff;font-family:inherit;
+  font-size:14px;transition:border-color .15s,background .15s;
+}
+.login-field input::placeholder{color:rgba(255,255,255,.35);}
+.login-field input:focus{outline:none;border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.14);}
+.login-field .fi{position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  color:rgba(255,255,255,.45);font-size:13px;pointer-events:none;}
+.login-field .eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:13px;
+  padding:2px;transition:color .15s;}
+.login-field .eye-btn:hover{color:rgba(255,255,255,.8);}
+.login-error{
+  background:rgba(225,29,72,.25);border:1px solid rgba(225,29,72,.4);
+  border-radius:8px;padding:8px 12px;color:#fca5a5;font-size:12.5px;
+  margin-bottom:14px;display:none;align-items:center;gap:7px;
+}
+.login-error.show{display:flex;}
+.login-btn{
+  width:100%;background:rgba(255,255,255,.9);color:#3730a3;
+  border:none;border-radius:10px;padding:11px;font-family:inherit;
+  font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;
+}
+.login-btn:hover{background:#fff;box-shadow:0 4px 18px rgba(255,255,255,.3);}
+.login-btn:active{transform:scale(.97);}
+.login-footer{text-align:center;margin-top:20px;color:rgba(255,255,255,.28);font-size:11px;}
+
+/* ══ TOPBAR USER / LOGOUT ══ */
+.topbar-user{display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:var(--r);
+  background:var(--surface2);border:1.5px solid var(--border2);cursor:pointer;
+  font-size:12.5px;font-weight:600;color:var(--text2);transition:all .15s;}
+.topbar-user:hover{border-color:var(--rose);color:var(--rose);}
+.topbar-user i{font-size:13px;}
+
 /* ══ LAYOUT ══ */
 .layout{display:flex;min-height:100vh;}
 .sidebar{width:248px;background:var(--sidebar-bg);flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;box-shadow:2px 0 20px rgba(79,70,229,.18);transition:background .2s;}
@@ -234,6 +297,20 @@ tbody tr:nth-child(even){background:var(--surface2);}
 .kv-val{font-family:'DM Serif Display',serif;font-size:26px;color:var(--indigo);line-height:1;}
 .kv-label{font-size:10.5px;color:var(--muted);font-weight:500;line-height:1.4;}
 
+/* ══ STATISTIK FILTER BAR ══ */
+.stat-filter-bar {
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);
+  padding:14px 18px;margin-bottom:20px;box-shadow:var(--shadow);
+  display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;
+}
+.stat-filter-bar .field label{font-size:11px;font-weight:600;color:var(--text2);}
+.stat-filter-bar .form-control{height:36px;min-width:150px;}
+.stat-active-badge {
+  background:var(--indigo-l);color:var(--indigo);border:1px solid var(--indigo);
+  border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:600;
+  display:inline-flex;align-items:center;gap:5px;
+}
+
 /* ══ PETA ══ */
 #mapContainer{height:480px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);}
 .map-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
@@ -250,7 +327,7 @@ tbody tr:nth-child(even){background:var(--surface2);}
 .cal-day{background:var(--surface2);border:1px solid var(--border);border-radius:8px;min-height:68px;padding:6px 8px;cursor:pointer;transition:all .15s;position:relative;}
 .cal-day:hover{border-color:var(--indigo);box-shadow:var(--shadow2);}
 .cal-day.today{border-color:var(--indigo);background:var(--indigo-l);}
-.cal-day.other-month{opacity:.35;}
+.cal-day.other-month{opacity:.35;pointer-events:none;}
 .cal-day.has-data{border-color:rgba(79,70,229,.3);}
 .cal-day.selected{background:var(--indigo-l);border-color:var(--indigo);}
 .cal-day-num{font-size:12px;font-weight:700;color:var(--text2);}
@@ -284,6 +361,44 @@ tbody tr:nth-child(even){background:var(--surface2);}
 </style>
 </head>
 <body>
+
+<!-- ═══════════ LOGIN OVERLAY ═══════════ -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="https://drive.google.com/thumbnail?id=1jxAPlpHaXSyfNEWgiSgGtlPgpM5A2MEv&sz=w80"
+           onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Logo_Kota_Batu.png/200px-Logo_Kota_Batu.png'" alt="Logo">
+      <h2>Database PPKS<br>Kota Batu</h2>
+      <p>Dinas Sosial – Sistem Informasi</p>
+    </div>
+    <div class="login-error" id="loginError">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span id="loginErrorMsg">Username atau password salah.</span>
+    </div>
+    <div class="login-field">
+      <label>Username</label>
+      <div class="input-wrap">
+        <i class="fa-solid fa-user fi"></i>
+        <input type="text" id="loginUser" placeholder="Masukkan username" autocomplete="username">
+      </div>
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <div class="input-wrap">
+        <i class="fa-solid fa-lock fi"></i>
+        <input type="password" id="loginPass" placeholder="Masukkan password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="eye-btn" type="button" onclick="togglePassVis()" id="eyeBtn" title="Lihat password">
+          <i class="fa-solid fa-eye" id="eyeIcon"></i>
+        </button>
+      </div>
+    </div>
+    <button class="login-btn" onclick="doLogin()">
+      <i class="fa-solid fa-right-to-bracket"></i> Masuk
+    </button>
+    <div class="login-footer">Sistem Informasi PPKS © 2026<br>Kota Batu – Dinas Sosial</div>
+  </div>
+</div>
+
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 <div class="layout">
 
@@ -333,6 +448,12 @@ tbody tr:nth-child(even){background:var(--surface2);}
       </div>
       <button class="dark-toggle" onclick="toggleDark()" id="darkBtn" title="Dark/Light mode">
         <i class="fa-solid fa-moon" id="darkIcon"></i>
+      </button>
+      <!-- Tombol logout -->
+      <button class="topbar-user" onclick="doLogout()" title="Keluar">
+        <i class="fa-solid fa-circle-user"></i>
+        <span id="topbarUsername">–</span>
+        <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;opacity:.7;"></i>
       </button>
     </div>
   </header>
@@ -436,6 +557,35 @@ tbody tr:nth-child(even){background:var(--surface2);}
       <h1><i class="fa-solid fa-chart-pie" style="color:var(--indigo);margin-right:8px;"></i>Statistik PPKS</h1>
       <p>Visualisasi data Penyandang Permasalahan Kesejahteraan Sosial – Kota Batu</p>
     </div>
+
+    <!-- ── Filter Rentang Waktu Statistik ── -->
+    <div class="stat-filter-bar">
+      <i class="fa-solid fa-calendar-range" style="color:var(--indigo);font-size:16px;margin-bottom:2px;"></i>
+      <div class="field">
+        <label>Dari Tanggal</label>
+        <input type="date" id="statTglMulai" class="form-control" style="min-width:150px;">
+      </div>
+      <div class="field">
+        <label>Sampai Tanggal</label>
+        <input type="date" id="statTglAkhir" class="form-control" style="min-width:150px;">
+      </div>
+      <div class="field">
+        <label>Jenis PPKS</label>
+        <select id="statFJenis" class="form-select" style="min-width:180px;"><option value="">– Semua Jenis –</option></select>
+      </div>
+      <div style="display:flex;gap:8px;padding-bottom:1px;">
+        <button class="btn btn-primary btn-sm" onclick="applyStatFilter()">
+          <i class="fa-solid fa-chart-bar"></i> Terapkan
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="resetStatFilter()">
+          <i class="fa-solid fa-rotate-left"></i> Reset
+        </button>
+      </div>
+      <div id="statActiveLabel" style="display:none;padding-bottom:2px;">
+        <span class="stat-active-badge"><i class="fa-solid fa-filter"></i> <span id="statActiveTxt">Filter aktif</span></span>
+      </div>
+    </div>
+
     <div class="stat-kv-grid" id="statKvGrid"></div>
     <div class="charts-grid">
       <div class="chart-panel">
@@ -587,6 +737,66 @@ tbody tr:nth-child(even){background:var(--surface2);}
 
 <script>
 /* ══════════════════════════════════════════
+   ▌ LOGIN — HARDCODED CREDENTIALS
+   ▌ Ubah USERNAME & PASSWORD di bawah ini
+══════════════════════════════════════════ */
+const USERS = [
+  { username: "admin",   password: "ppksbatu2026" },
+  { username: "dinsos",  password: "dinsos2026"   },
+];
+const SESSION_KEY = "ppks_logged_in";
+const SESSION_USER_KEY = "ppks_username";
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const match = USERS.find(x => x.username === u && x.password === p);
+  if (match) {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    sessionStorage.setItem(SESSION_USER_KEY, u);
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.getElementById('topbarUsername').textContent = u;
+    loadData();
+  } else {
+    const err = document.getElementById('loginError');
+    err.classList.add('show');
+    document.getElementById('loginErrorMsg').textContent = 'Username atau password salah.';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+    // Shake animation
+    const box = document.querySelector('.login-box');
+    box.style.animation = 'none';
+    setTimeout(() => { box.style.animation = ''; }, 10);
+  }
+}
+
+function doLogout() {
+  if (!confirm('Yakin ingin keluar?')) return;
+  sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_USER_KEY);
+  location.reload();
+}
+
+function togglePassVis() {
+  const inp = document.getElementById('loginPass');
+  const ico = document.getElementById('eyeIcon');
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  ico.className = show ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+}
+
+// Cek session saat halaman dimuat
+(function checkSession() {
+  if (sessionStorage.getItem(SESSION_KEY) === '1') {
+    const savedUser = sessionStorage.getItem(SESSION_USER_KEY) || 'user';
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.getElementById('topbarUsername').textContent = savedUser;
+    // loadData() dipanggil setelah DOMContentLoaded biasa dari inisialisasi bawah
+  }
+  // Jika tidak login, overlay tetap tampil, loadData() TIDAK dipanggil di sini
+})();
+
+/* ══════════════════════════════════════════
    CONFIG & CONSTANTS
 ══════════════════════════════════════════ */
 const API_URL = "https://script.google.com/macros/s/AKfycbz7o4RXsBAzyon34taMdP_HSHY_7E2a-QysdBWD6Abjv-Jb0hK0bHd4oyibfrNeSD45/exec";
@@ -641,34 +851,30 @@ const PPKS_CATEGORIES = [
 
 const CHART_COLORS = ['#4f46e5','#0ea5e9','#059669','#d97706','#e11d48','#7c3aed','#0d9488','#ea580c','#db2777','#65a30d','#0891b2','#6366f1','#10b981','#f59e0b','#ef4444','#8b5cf6','#14b8a6','#f97316','#ec4899','#84cc16','#06b6d4','#a78bfa','#34d399','#fbbf24','#f87171','#c084fc','#2dd4bf','#fb923c'];
 
-// Koordinat per kecamatan Kota Batu (untuk peta)
 const KEC_COORDS = {
   "batu":    [-7.8683,112.5263],
   "bumiaji": [-7.8108,112.5085],
   "junrejo": [-7.9068,112.5482],
 };
-
-// Warna per jenis PPKS untuk peta
 const PPKS_COLORS = ['#4f46e5','#e11d48','#059669','#d97706','#7c3aed','#0ea5e9','#0d9488','#db2777','#ea580c','#65a30d','#0891b2','#6366f1','#ef4444','#8b5cf6','#f97316','#ec4899','#f59e0b','#34d399','#a78bfa','#fbbf24'];
 
-/* ══════════════════════════════════════════
-   STATE
-══════════════════════════════════════════ */
+/* ══ STATE ══ */
 let allData = [], filtered = [], sortCol = "TANGGAL", sortDir = "desc", curPage = 1;
 const PER_PAGE = 20;
 let chartDonut=null, chartGender=null, chartTime=null, chartLayanan=null, chartKec=null;
 let leafletMap=null, markerLayer=null;
 let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
 
-/* ══════════════════════════════════════════
-   DARK MODE
-══════════════════════════════════════════ */
+// State filter statistik
+let statFilterMulai = null, statFilterAkhir = null, statFilterJenis = '';
+
+/* ══ DARK MODE ══ */
 function toggleDark() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
   document.getElementById('darkIcon').className = isDark ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
   localStorage.setItem('ppks-theme', isDark ? 'light' : 'dark');
-  if (chartDonut) renderStatistik(); // refresh charts colors
+  if (chartDonut) renderStatistik();
 }
 (function initTheme() {
   const saved = localStorage.getItem('ppks-theme');
@@ -678,9 +884,7 @@ function toggleDark() {
   }
 })();
 
-/* ══════════════════════════════════════════
-   PAGE NAVIGATION
-══════════════════════════════════════════ */
+/* ══ PAGE NAV ══ */
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item[id]').forEach(n => n.classList.remove('active'));
@@ -692,14 +896,11 @@ function showPage(name) {
   if (name === 'kalender' && allData.length) renderKalender();
 }
 
-/* ══════════════════════════════════════════
-   UTILS
-══════════════════════════════════════════ */
+/* ══ UTILS ══ */
 function toTitleCase(str) {
   if (!str) return '';
   return String(str).toLowerCase().replace(/(?:^|\s|\/|-)\S/g, c => c.toUpperCase());
 }
-
 const BULAN_ID = {'januari':0,'februari':1,'maret':2,'april':3,'mei':4,'juni':5,'juli':6,'agustus':7,'september':8,'oktober':9,'november':10,'desember':11};
 function parseDate(raw) {
   if (!raw) return null;
@@ -726,98 +927,16 @@ function getBadgeClass(jenis) {
   for (let i=0; i<PPKS_CATEGORIES.length; i++) if (j.includes(PPKS_CATEGORIES[i].key)) return `b-${i}`;
   return 'b-def';
 }
-
-/* ══════════════════════════════════════════
-   FORMULA PEMETAAN 5 ATURAN UTAMA
-   Sumber kolom spreadsheet → field HTML
-══════════════════════════════════════════
-
-  ┌─────────────────────────────────────────────────────────────────────┐
-  │ ATURAN 1 — Kec. Temuan                                              │
-  │   Kolom C: "Kecamatan ditemukannya PPKS"                           │
-  │   Jika kosong → tampil '–'                                          │
-  │                                                                     │
-  │ ATURAN 2 — Kota / Kabupaten                                         │
-  │   Kolom J: "Kota / Kabupaten"                                       │
-  │   Jika J kosong ATAU J = "Luar Batu"                                │
-  │     → ambil Kolom Y: "Kota/Kabupaten Luar Batu"                     │
-  │                                                                     │
-  │   Skenario:                                                         │
-  │     Warga Batu    → J="Batu"        → Kota = Batu                  │
-  │     Luar Batu baru→ J="Luar Batu"   → Kota = Kolom Y (mis. Bogor)  │
-  │     Luar Batu lama→ J="Bogor"       → Kota = Bogor (langsung)      │
-  │                                                                     │
-  │ ATURAN 3 — Kecamatan (domisili PPKS)                                │
-  │   Kolom I: "Kecamatan"                                              │
-  │   Jika Kolom J = "Luar Batu"                                        │
-  │     → ambil Kolom X: "Kecamatan Luar Batu"                          │
-  │                                                                     │
-  │   Skenario:                                                         │
-  │     Warga Batu    → I="Bumiaji"     → Kec = Bumiaji                │
-  │     Luar Batu baru→ J="Luar Batu"   → Kec = Kolom X (Tajurhalang) │
-  │     Luar Batu lama→ I="Tajurhalang" → Kec = Tajurhalang            │
-  │                                                                     │
-  │ ATURAN 4 — Desa / Kelurahan                                         │
-  │   Kolom H: "Desa/Kelurahan"                                         │
-  │                                                                     │
-  │ ATURAN 5 — Alamat                                                   │
-  │   Kolom F: "Alamat PPKS"                                            │
-  └─────────────────────────────────────────────────────────────────────┘
-
-  Semua aturan di atas sudah dihitung oleh Apps Script sebelum data
-  dikirim ke HTML. HTML tinggal memakai field hasil pemetaan:
-    KECAMATAN_TEMUAN ← Aturan 1 (kolom C)
-    KOTA             ← Aturan 2 (kolom J → fallback Y)
-    KECAMATAN        ← Aturan 3 (kolom I → fallback X jika J="Luar Batu")
-    DESA             ← Aturan 4 (kolom H)
-    ALAMAT           ← Aturan 5 (kolom F)
-*/
-
-/**
- * Terapkan 5 aturan pemetaan field + normalisasi teks.
- * Jika suatu hari Apps Script berubah dan mengirim field mentah,
- * cukup tambahkan logika fallback di sini.
- * @param {Object} d  — objek satu baris dari API
- */
-function mapPPKSFields(d) {
-  // ── Aturan 1: Kec. Temuan ─────────────────────────────────────────
-  // Kolom C ("Kecamatan ditemukannya PPKS") → KECAMATAN_TEMUAN
-  // Kosong ditangani saat render: item.KECAMATAN_TEMUAN||'–'
-  const kecTemuan = toTitleCase((d.KECAMATAN_TEMUAN || '').trim());
-
-  // ── Aturan 2: Kota / Kabupaten ────────────────────────────────────
-  // Kolom J ("Kota / Kabupaten") → KOTA
-  // Jika J kosong atau "Luar Batu" → Apps Script sudah pakai kolom Y
-  const kota = toTitleCase((d.KOTA || '').trim());
-
-  // ── Aturan 3: Kecamatan ───────────────────────────────────────────
-  // Kolom I ("Kecamatan") → KECAMATAN
-  // Jika J = "Luar Batu" → Apps Script sudah pakai kolom X
-  const kecamatan = toTitleCase((d.KECAMATAN || '').trim());
-
-  // ── Aturan 4: Desa / Kelurahan ────────────────────────────────────
-  // Kolom H ("Desa/Kelurahan") → DESA
-  const desa = toTitleCase((d.DESA || '').trim());
-
-  // ── Aturan 5: Alamat ──────────────────────────────────────────────
-  // Kolom F ("Alamat PPKS") → ALAMAT
-  const alamat = toTitleCase((d.ALAMAT || '').trim());
-
-  return {
-    ...d,
-    KECAMATAN_TEMUAN:   kecTemuan,
-    KOTA:               kota,
-    KECAMATAN:          kecamatan,
-    DESA:               desa,
-    ALAMAT:             alamat,
-    TINDAK_LANJUT:      toTitleCase(d.TINDAK_LANJUT),
-    TINDAK_LANJUT_STAT: normalizeTindakLanjut(d.TINDAK_LANJUT),
-  };
+function pLok(s) {
+  if (!s) return null;
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y,m-1,d);
+}
+function dateMs(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 }
 
-/* ══════════════════════════════════════════
-   LOAD DATA
-══════════════════════════════════════════ */
+/* ══ LOAD DATA ══ */
 async function loadData() {
   try {
     const res  = await fetch(API_URL);
@@ -828,11 +947,11 @@ async function loadData() {
     document.getElementById('lastUpdate').textContent =
       new Date().toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
 
-    // badge "baru" di sidebar
     const newCount = allData.filter(d => isNew(d.TANGGAL)).length;
     if (newCount > 0) {
       const nav = document.getElementById('nav-database');
-      nav.innerHTML += `<span class="nav-badge">${newCount}</span>`;
+      if (!nav.querySelector('.nav-badge'))
+        nav.innerHTML += `<span class="nav-badge">${newCount}</span>`;
     }
 
     buildDropdowns();
@@ -847,20 +966,38 @@ async function loadData() {
   }
 }
 
-/* ══════════════════════════════════════════
-   DROPDOWNS
-══════════════════════════════════════════ */
+function mapPPKSFields(d) {
+  const kecTemuan = toTitleCase((d.KECAMATAN_TEMUAN || '').trim());
+  const kota = toTitleCase((d.KOTA || '').trim());
+  const kecamatan = toTitleCase((d.KECAMATAN || '').trim());
+  const desa = toTitleCase((d.DESA || '').trim());
+  const alamat = toTitleCase((d.ALAMAT || '').trim());
+  return {
+    ...d,
+    KECAMATAN_TEMUAN:   kecTemuan,
+    KOTA:               kota,
+    KECAMATAN:          kecamatan,
+    DESA:               desa,
+    ALAMAT:             alamat,
+    TINDAK_LANJUT:      toTitleCase(d.TINDAK_LANJUT),
+    TINDAK_LANJUT_STAT: normalizeTindakLanjut(d.TINDAK_LANJUT),
+  };
+}
+
+/* ══ DROPDOWNS ══ */
 function buildDropdowns() {
   fillSelect('fJenis', [...new Set(allData.map(d=>d.JENIS_PPKS).filter(Boolean))].sort(), '– Semua Jenis –');
   fillSelect('fKecamatan', [...new Set(allData.map(d=>d.KECAMATAN_TEMUAN).filter(Boolean))].sort(), '– Semua –');
   fillSelect('fKota', [...new Set(allData.map(d=>d.KOTA).filter(Boolean))].sort(), '– Semua Kota –');
   fillSelect('mapFJenis', [...new Set(allData.map(d=>d.JENIS_PPKS).filter(Boolean))].sort(), '– Semua –');
   fillSelect('mapFKec', [...new Set(allData.map(d=>d.KECAMATAN_TEMUAN).filter(Boolean))].sort(), '– Semua –');
+  fillSelect('statFJenis', [...new Set(allData.map(d=>d.JENIS_PPKS).filter(Boolean))].sort(), '– Semua Jenis –');
   populateKecOptions(''); populateDesaOptions('','');
   buildYearOptions();
 }
 function fillSelect(id, items, placeholder) {
   const sel = document.getElementById(id);
+  if (!sel) return;
   sel.innerHTML = `<option value="">${placeholder}</option>`;
   items.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o); });
 }
@@ -894,9 +1031,7 @@ function buildYearOptions() {
   });
 }
 
-/* ══════════════════════════════════════════
-   FILTER
-══════════════════════════════════════════ */
+/* ══ FILTER (DATABASE) ══ */
 function applyFilter() {
   const search = document.getElementById('fSearch').value.toLowerCase().trim();
   const jenis  = document.getElementById('fJenis').value.trim();
@@ -905,10 +1040,8 @@ function applyFilter() {
   const fKota  = document.getElementById('fKota').value.trim();
   const fKec   = document.getElementById('fKec').value.trim();
   const fDesa  = document.getElementById('fDesa').value.trim();
-  // Parse YYYY-MM-DD dari input sebagai LOKAL bukan UTC
-  function pLok(s){if(!s)return null;const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
-  const mulai = pLok(document.getElementById('fTglMulai').value);
-  const akhir = pLok(document.getElementById('fTglAkhir').value);
+  const mulai  = pLok(document.getElementById('fTglMulai').value);
+  const akhir  = pLok(document.getElementById('fTglAkhir').value);
   filtered = allData.filter(item => {
     if (search && !((item.NAMA||'').toLowerCase().includes(search)||String(item.NIK||'').includes(search))) return false;
     if (jenis  && (item.JENIS_PPKS||'')!==jenis) return false;
@@ -919,9 +1052,9 @@ function applyFilter() {
     if (fDesa  && (item.DESA||'')!==fDesa) return false;
     if (mulai||akhir) {
       const d=parseDate(item.TANGGAL); if(!d) return false;
-      const dH=new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime();
-      if (mulai && dH < new Date(mulai.getFullYear(),mulai.getMonth(),mulai.getDate()).getTime()) return false;
-      if (akhir && dH > new Date(akhir.getFullYear(),akhir.getMonth(),akhir.getDate()).getTime()) return false;
+      const dH = dateMs(d);
+      if (mulai && dH < dateMs(mulai)) return false;
+      if (akhir && dH > dateMs(akhir)) return false;
     }
     return true;
   });
@@ -935,9 +1068,55 @@ function resetFilter() {
 }
 document.getElementById('fSearch').addEventListener('input', applyFilter);
 
-/* ══════════════════════════════════════════
-   STATS (database page)
-══════════════════════════════════════════ */
+/* ══ FILTER STATISTIK ══ */
+function applyStatFilter() {
+  statFilterMulai = pLok(document.getElementById('statTglMulai').value);
+  statFilterAkhir = pLok(document.getElementById('statTglAkhir').value);
+  statFilterJenis = document.getElementById('statFJenis').value.trim();
+
+  // Tampilkan badge aktif
+  const hasMulai = !!statFilterMulai, hasAkhir = !!statFilterAkhir, hasJenis = !!statFilterJenis;
+  const labelEl = document.getElementById('statActiveLabel');
+  const txtEl   = document.getElementById('statActiveTxt');
+  if (hasMulai || hasAkhir || hasJenis) {
+    let parts = [];
+    if (hasMulai || hasAkhir) {
+      const s = statFilterMulai ? fmtDate(document.getElementById('statTglMulai').value) : '…';
+      const e = statFilterAkhir ? fmtDate(document.getElementById('statTglAkhir').value) : '…';
+      parts.push(`${s} – ${e}`);
+    }
+    if (hasJenis) parts.push(statFilterJenis);
+    txtEl.textContent = parts.join(' · ');
+    labelEl.style.display = 'flex';
+  } else {
+    labelEl.style.display = 'none';
+  }
+  renderStatistik();
+}
+
+function resetStatFilter() {
+  document.getElementById('statTglMulai').value = '';
+  document.getElementById('statTglAkhir').value = '';
+  document.getElementById('statFJenis').value = '';
+  statFilterMulai = null; statFilterAkhir = null; statFilterJenis = '';
+  document.getElementById('statActiveLabel').style.display = 'none';
+  renderStatistik();
+}
+
+function getStatData() {
+  return allData.filter(item => {
+    if (statFilterJenis && (item.JENIS_PPKS||'') !== statFilterJenis) return false;
+    if (statFilterMulai || statFilterAkhir) {
+      const d = parseDate(item.TANGGAL); if (!d) return false;
+      const dH = dateMs(d);
+      if (statFilterMulai && dH < dateMs(statFilterMulai)) return false;
+      if (statFilterAkhir && dH > dateMs(statFilterAkhir)) return false;
+    }
+    return true;
+  });
+}
+
+/* ══ STATS CARDS (database page) ══ */
 function renderStats(data) {
   document.getElementById('st-total').textContent = data.length;
   document.getElementById('st-unik').textContent  = new Set(data.map(d=>d.NIK||d.NAMA)).size;
@@ -947,9 +1126,7 @@ function renderStats(data) {
   }).join('');
 }
 
-/* ══════════════════════════════════════════
-   SORT & TABLE
-══════════════════════════════════════════ */
+/* ══ SORT & TABLE ══ */
 function onSortChange()  { sortCol=document.getElementById('sortColSel').value; curPage=1; updateSortLabel(); sortAndRender(); }
 function toggleSortDir() {
   sortDir = sortDir==='asc' ? 'desc' : 'asc';
@@ -988,7 +1165,9 @@ function renderTable() {
     const jkIcon = item.JENIS_KELAMIN==='Perempuan' ? '<i class="fa-solid fa-venus" style="color:#db2777;font-size:12px;"></i>'
       : item.JENIS_KELAMIN==='Laki-laki' ? '<i class="fa-solid fa-mars" style="color:#2563eb;font-size:12px;"></i>' : '';
     const newRow = showNew && isNew(item.TANGGAL) ? ' row-new' : '';
-    return `<tr class="${newRow}" onclick="openProfil('${(item.NIK||item.NAMA||'').replace(/'/g,"\\'")}', '${item.NAMA.replace(/'/g,"\\'")}')">
+    const safeName = (item.NAMA||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const safeKey  = (item.NIK||item.NAMA||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<tr class="${newRow}" onclick="openProfil('${safeKey}','${safeName}')">
       <td style="color:var(--muted2);font-size:11.5px;">${start+i+1}</td>
       <td style="white-space:nowrap;font-size:12px;">${fmtDate(item.TANGGAL)}</td>
       <td style="font-family:monospace;font-size:10.5px;color:var(--muted);">${item.NIK||'–'}</td>
@@ -1020,11 +1199,8 @@ function renderPagination(pages) {
 }
 function gotoPage(p) { curPage=p; renderTable(); window.scrollTo({top:0,behavior:'smooth'}); }
 
-/* ══════════════════════════════════════════
-   PROFIL MODAL
-══════════════════════════════════════════ */
+/* ══ PROFIL MODAL ══ */
 function openProfil(key, nama) {
-  // Semua entri dengan NIK atau NAMA yang sama
   const riwayat = allData.filter(d => (d.NIK && d.NIK===key) || d.NAMA===nama).sort((a,b) => {
     const da=parseDate(a.TANGGAL),db=parseDate(b.TANGGAL);
     if(da&&db) return db-da; return 0;
@@ -1054,9 +1230,7 @@ function openProfil(key, nama) {
 function closeProfilModal() { document.getElementById('profilModal').classList.remove('open'); }
 document.getElementById('profilModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeProfilModal(); });
 
-/* ══════════════════════════════════════════
-   EXPORT EXCEL (.xlsx)
-══════════════════════════════════════════ */
+/* ══ EXPORT EXCEL ══ */
 function exportExcel() {
   const rows = [
     ['No','Tanggal','NIK','Nama','JK','Kec. Temuan','Kota/Kab','Kecamatan','Desa','RT/RW','Alamat','Jenis PPKS','Tindak Lanjut'],
@@ -1069,21 +1243,21 @@ function exportExcel() {
   XLSX.writeFile(wb, `Data_PPKS_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
-/* ══════════════════════════════════════════
-   STATISTIK CHARTS
-══════════════════════════════════════════ */
+/* ══ STATISTIK ══ */
 function destroyChart(c) { if(c) c.destroy(); return null; }
 const fontFam = "'Source Sans 3', sans-serif";
 
 function renderStatistik() {
-  const data = allData;
+  // Gunakan data yang sudah difilter oleh filter statistik
+  const data = getStatData();
+
   const kec  = new Set(data.map(d=>d.KECAMATAN_TEMUAN).filter(Boolean)).size;
   const laki = data.filter(d=>(d.JENIS_KELAMIN||'').toLowerCase().includes('laki')).length;
   const perempuan = data.filter(d=>(d.JENIS_KELAMIN||'').toLowerCase().includes('perempuan')).length;
   document.getElementById('statKvGrid').innerHTML = [
     {val:data.length,label:'Total Entri'},{val:new Set(data.map(d=>d.NIK||d.NAMA)).size,label:'Individu Unik'},
     {val:kec,label:'Kecamatan Temuan'},{val:laki,label:'Laki-laki'},
-    {val:perempuan,label:'Perempuan'},{val:allData.filter(d=>isNew(d.TANGGAL)).length,label:'Baru (7 hari)'},
+    {val:perempuan,label:'Perempuan'},{val:data.filter(d=>isNew(d.TANGGAL)).length,label:'Baru (7 hari)'},
   ].map(kv=>`<div class="stat-kv"><div class="kv-val">${kv.val}</div><div class="kv-label">${kv.label}</div></div>`).join('');
 
   // Donut
@@ -1120,7 +1294,7 @@ function renderStatistik() {
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{family:fontFam,size:9.5},maxRotation:45}},y:{ticks:{font:{family:fontFam,size:10.5}},beginAtZero:true}}}
   });
 
-  // Layanan (pakai STAT)
+  // Layanan
   chartLayanan = destroyChart(chartLayanan);
   const layMap={};
   data.forEach(d=>{ const k=d.TINDAK_LANJUT_STAT||'–'; layMap[k]=(layMap[k]||0)+1; });
@@ -1143,9 +1317,7 @@ function renderStatistik() {
   });
 }
 
-/* ══════════════════════════════════════════
-   PETA PERSEBARAN
-══════════════════════════════════════════ */
+/* ══ PETA ══ */
 function initPeta() {
   if (!leafletMap) {
     leafletMap = L.map('mapContainer').setView([-7.8683,112.5263], 12);
@@ -1156,39 +1328,30 @@ function initPeta() {
   }
   renderPeta();
 }
-
 function resetMapFilter() {
   document.getElementById('mapFJenis').value='';
   document.getElementById('mapFKec').value='';
   renderPeta();
 }
-
 function renderPeta() {
   if (!leafletMap) return;
   markerLayer.clearLayers();
   const fj = document.getElementById('mapFJenis').value;
   const fk = document.getElementById('mapFKec').value;
-
-  // Bangun index jenis → warna
   const jenisSet = [...new Set(allData.map(d=>d.JENIS_PPKS).filter(Boolean))].sort();
   const colorMap = {};
   jenisSet.forEach((j,i) => { colorMap[j] = PPKS_COLORS[i % PPKS_COLORS.length]; });
-
   let data = allData;
   if (fj) data = data.filter(d=>d.JENIS_PPKS===fj);
   if (fk) data = data.filter(d=>d.KECAMATAN_TEMUAN===fk);
-
-  // Cluster per kecamatan temuan
   const kecGroups={};
   data.forEach(d => {
     const k=(d.KECAMATAN_TEMUAN||'').toLowerCase().trim();
     if (!kecGroups[k]) kecGroups[k]=[];
     kecGroups[k].push(d);
   });
-
   Object.entries(kecGroups).forEach(([kec, items]) => {
     const base = KEC_COORDS[kec] || KEC_COORDS['batu'];
-    // Spread marker dalam radius kecil agar tidak tumpuk
     items.forEach((item, idx) => {
       const angle = (idx/items.length)*2*Math.PI;
       const spread = Math.min(0.008, 0.003*Math.sqrt(items.length));
@@ -1211,30 +1374,24 @@ function renderPeta() {
       markerLayer.addLayer(circle);
     });
   });
-
-  // Legend
-  const usedJenis = [...new Set(data.map(d=>d.JENIS_PPKS).filter(Boolean))];
-  document.getElementById('mapLegend').innerHTML = usedJenis.slice(0,16).map(j=>
+  document.getElementById('mapLegend').innerHTML = [...new Set(data.map(d=>d.JENIS_PPKS).filter(Boolean))].slice(0,16).map(j=>
     `<div class="map-legend-item"><div class="map-legend-dot" style="background:${colorMap[j]||'#4f46e5'};"></div>${j}</div>`
   ).join('');
-
-  // Refresh map layout
   setTimeout(() => leafletMap.invalidateSize(), 100);
 }
 
 /* ══════════════════════════════════════════
-   KALENDER
+   KALENDER — FIX: filterByDate pakai data
+   attribute supaya onclick di innerHTML
+   tidak bergantung pada closure variable
 ══════════════════════════════════════════ */
 function renderKalender() {
   document.getElementById('calTitle').textContent = `${BULAN_NAMA[calMonth+1]} ${calYear}`;
   const grid = document.getElementById('calGrid');
-  // Header hari
   let html = HARI_NAMA.map(h=>`<div class="cal-header">${h}</div>`).join('');
   const first = new Date(calYear, calMonth, 1).getDay();
   const days  = new Date(calYear, calMonth+1, 0).getDate();
   const today = new Date();
-
-  // Hitung data per tanggal
   const dateCount={};
   allData.forEach(d=>{
     const dt=parseDate(d.TANGGAL); if(!dt) return;
@@ -1242,55 +1399,56 @@ function renderKalender() {
       const k=dt.getDate(); dateCount[k]=(dateCount[k]||0)+1;
     }
   });
-
-  // Isi hari dari bulan sebelumnya
   const prevDays = new Date(calYear,calMonth,0).getDate();
   for(let i=0;i<first;i++) html+=`<div class="cal-day other-month"><div class="cal-day-num">${prevDays-first+1+i}</div></div>`;
-
   for(let d=1;d<=days;d++) {
     const isToday = today.getFullYear()===calYear && today.getMonth()===calMonth && today.getDate()===d;
     const cnt = dateCount[d]||0;
     const hasData = cnt>0;
-    html+=`<div class="cal-day ${isToday?'today':''} ${hasData?'has-data':''}" onclick="calClick(${d})">
+    // ── FIX: simpan tanggal lengkap di data-date untuk menghindari closure bug ──
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    html+=`<div class="cal-day ${isToday?'today':''} ${hasData?'has-data':''}" data-date="${dateStr}" onclick="calClick(this)">
       <div class="cal-day-num">${d}</div>
       ${hasData?`<div class="cal-count">${cnt}</div><div class="cal-count-label">data</div>`:''}
     </div>`;
   }
-
-  // Sisa kotak
   const total = first+days;
   const rem = total%7===0 ? 0 : 7-(total%7);
   for(let i=1;i<=rem;i++) html+=`<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
-
   grid.innerHTML = html;
 }
 
-function calClick(day) {
-  // Hapus selected lama
-  document.querySelectorAll('.cal-day.selected').forEach(el=>el.classList.remove('selected'));
-  // Tandai yang diklik
-  const cells = document.querySelectorAll('.cal-day:not(.other-month)');
-  cells.forEach(el=>{ if(+el.querySelector('.cal-day-num').textContent===day) el.classList.add('selected'); });
+// ── FIX: calClick menerima elemen, baca tanggal dari data-date attribute ──
+function calClick(el) {
+  document.querySelectorAll('.cal-day.selected').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
 
-  const target = new Date(calYear, calMonth, day);
-  const items = allData.filter(d=>{
-    const dt=parseDate(d.TANGGAL); if(!dt) return false;
-    return dt.getFullYear()===target.getFullYear() && dt.getMonth()===target.getMonth() && dt.getDate()===target.getDate();
+  const dateStr = el.dataset.date;           // format YYYY-MM-DD
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const target = new Date(y, m-1, d);
+
+  const items = allData.filter(row => {
+    const dt = parseDate(row.TANGGAL); if (!dt) return false;
+    return dt.getFullYear()===y && dt.getMonth()===m-1 && dt.getDate()===d;
   });
+
   const info = document.getElementById('calInfo');
   if (!items.length) { info.className='cal-selected-info'; return; }
   info.className='cal-selected-info show';
-  info.innerHTML=`<strong>${items.length} data pada ${day} ${BULAN_NAMA[calMonth+1]} ${calYear}:</strong>
+
+  // Tombol filter pakai data-date bukan closure → tidak ada bug
+  info.innerHTML=`<strong>${items.length} data pada ${d} ${BULAN_NAMA[m]} ${y}:</strong>
     <ul style="margin:8px 0 0 16px;">
-      ${items.map(d=>`<li style="font-size:12.5px;margin-bottom:3px;">${d.NAMA} — <span style="color:var(--indigo)">${d.JENIS_PPKS||'–'}</span></li>`).join('')}
+      ${items.map(row=>`<li style="font-size:12.5px;margin-bottom:3px;">${row.NAMA} — <span style="color:var(--indigo)">${row.JENIS_PPKS||'–'}</span></li>`).join('')}
     </ul>
-    <div style="margin-top:8px;">
-      <button class="btn btn-primary btn-sm" onclick="filterByDate((calYear)+'-'+('0'+(calMonth+1)).slice(-2)+'-'+('0'+day).slice(-2))">
+    <div style="margin-top:10px;">
+      <button class="btn btn-primary btn-sm" onclick="filterByDate('${dateStr}')">
         <i class="fa-solid fa-filter"></i> Tampilkan di tabel
       </button>
     </div>`;
 }
 
+// ── FIX: filterByDate sekarang terima string YYYY-MM-DD langsung ──
 function filterByDate(dateStr) {
   showPage('database');
   document.getElementById('fTglMulai').value = dateStr;
@@ -1307,9 +1465,7 @@ function toggleSidebar() {
 function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderKalender(); }
 function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderKalender(); }
 
-/* ══════════════════════════════════════════
-   EXPORT MODAL + REPORT
-══════════════════════════════════════════ */
+/* ══ EXPORT MODAL ══ */
 function openExportModal()  { document.getElementById('exportModal').classList.add('open'); }
 function closeExportModal() { document.getElementById('exportModal').classList.remove('open'); }
 document.getElementById('exportModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeExportModal();});
@@ -1352,7 +1508,7 @@ function generateReport() {
   else exportReportPDF(monthData, reportTitle);
 }
 
-/* ════ SHARED SPM HELPERS ════ */
+/* ════ SPM HELPERS ════ */
 const SPM_LAYANAN = [
   "Layanan data dan pengaduan",
   "Penyediaan layanan kedaruratan / layanan reaksi cepat",
@@ -1405,7 +1561,7 @@ function footKecRpt(ppksData){
   });
 }
 
-/* ════ FORMAT 1: EXCEL ════ */
+/* ════ EXCEL REPORT ════ */
 function exportReportExcel(monthData,reportTitle){
   const wb=XLSX.utils.book_new();
   const ppksList=[...new Set(monthData.map(d=>(d.JENIS_PPKS||'').trim()).filter(Boolean))].sort();
@@ -1436,7 +1592,7 @@ function exportReportExcel(monthData,reportTitle){
   XLSX.writeFile(wb,`Laporan_PPKS_${reportTitle.replace(/[^a-zA-Z0-9]/g,'_')}.xlsx`);
 }
 
-/* ════ FORMAT 2: WORD/DOCS ════ */
+/* ════ WORD REPORT ════ */
 function exportReportDocs(monthData,reportTitle){
   const ppksList=[...new Set(monthData.map(d=>(d.JENIS_PPKS||'').trim()).filter(Boolean))].sort();
   function buildDocTable(pd,label){
@@ -1487,7 +1643,7 @@ function exportReportDocs(monthData,reportTitle){
   a.download=`Laporan_PPKS_${reportTitle.replace(/[^a-zA-Z0-9]/g,'_')}.doc`; a.click();
 }
 
-/* ════ FORMAT 3: PDF / CETAK ════ */
+/* ════ PDF REPORT ════ */
 function exportReportPDF(monthData,reportTitle){
   const ppksList=[...new Set(monthData.map(d=>(d.JENIS_PPKS||'').trim()).filter(Boolean))].sort();
   function buildL2(pd,label){
@@ -1540,11 +1696,11 @@ function exportReportPDF(monthData,reportTitle){
   w.document.write(html); w.document.close();
 }
 
-
-/* ══════════════════════════════════════════
-   INIT
-══════════════════════════════════════════ */
-loadData();
+/* ══ INIT ══ */
+// Hanya load data jika sudah login (session sudah ada)
+if (sessionStorage.getItem(SESSION_KEY) === '1') {
+  loadData();
+}
 </script>
 </body>
 </html>
